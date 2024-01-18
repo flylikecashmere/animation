@@ -163,17 +163,17 @@ function checkBounds(obj,dim,type) { // object to check, dimensions and directio
         
         if (type === "touch") { // check if object is touches screen limits (only has to be true for one check)
 
-        if (touchLimit(bounds_dic,dim[j])) { 
-            out_boo = true
-            break
-        }
+            if (touchLimit(bounds_dic,dim[j])) { 
+                out_boo = true
+                break
+            }
 
         } else if (type === "out") { // check if object is completely outside of screen limits (must be true for all checks)
-        if (out_boo && outLimit(bounds_dic,dim[j]))  { 
-            out_boo = true
-        } else {
-            out_boo = false
-        }
+            if (out_boo && outLimit(bounds_dic,dim[j]))  { 
+                out_boo = true
+            } else {
+                out_boo = false
+            }
 
         }
     }
@@ -188,3 +188,32 @@ function pDicToArr(cordDic) {
 function pArrToDic(pArr) {
     return { x: pArr[0], y: pArr[1] }
 }
+
+// changes position of container to point mirrored on line
+function mirror(container,p1_arr,p2_arr) { // container, first point of line, second point of line
+
+    // get center of of container
+    const cent_arr = [container.x, container.y];
+  
+    if (p1_arr[0] === p2_arr[0]) { // vertical line
+      var projX_fl = p2_arr[0] + (p2_arr[0] - cent_arr[0])
+      var projY_fl = cent_arr[1]
+    } else if (p1_arr[1] === p2_arr[1]) { // horizontal line
+      var projX_fl = cent_arr[0]
+      var projY_fl = p2_arr[1] + (p2_arr[1] - cent_arr[1])
+    } else {
+      // equation for line crossing the two points
+      const slMirAx_fl = (p2_arr[1] - p1_arr[1]) / (p2_arr[0] - p1_arr[0]);
+      const yMirAx_fl = p2_arr[1] - p2_arr[0] * slMirAx_fl;
+      // compute orthogonal point on mirror axis
+      const yOrth_fl =  cent_arr[1] - cent_arr[0] * (-1 / slMirAx_fl);
+      const intSectX_fl = (yOrth_fl - yMirAx_fl) /  (slMirAx_fl + 1/slMirAx_fl)
+      // compute projected point
+      var projX_fl = intSectX_fl + (intSectX_fl - cent_arr[0])
+      var projY_fl = yOrth_fl + projX_fl * (-1 / slMirAx_fl)
+    }
+  
+    // adjust container position
+    container.position = {x: projX_fl, y: projY_fl}
+  
+  }
