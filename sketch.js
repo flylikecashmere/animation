@@ -1,5 +1,5 @@
 
-checkFps = true;
+checkFps = false;
 
 // load initialization script
 fpsMeter = loadFps(checkFps)
@@ -8,7 +8,7 @@ fpsMeter = loadFps(checkFps)
 var col_int = 0;
 
 // canvas setup
-const size_fl =  window.innerWidth/2 // size in x-direction
+const size_fl =  window.innerWidth // size in x-direction
 const rat_fl = window.outerHeight/window.innerWidth; // factor for size in y-direction
 
 const size = {x: size_fl, y: size_fl*rat_fl}
