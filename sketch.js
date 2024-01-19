@@ -41,7 +41,7 @@ app.view.addEventListener('touchstart', (event) => {
 });
 
 // prepare large number of blobs and put into single object
-let crcStr_int = 50;
+let crcStr_int = 200;
 let crcStr_arr = new Array(crcStr_int);
 let rad_arr = new Array(crcStr_int);
 
