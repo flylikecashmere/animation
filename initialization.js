@@ -33,12 +33,14 @@ function startCanvas() {
     });
     document.body.appendChild(app.view);
   
-  // toogle fullscreen on click
-  app.view.addEventListener('click', (event) => {
-    if (event.button === 0) {
-    toggleFullscreen();
-    }
-  });
+    // toogle fullscreen on click
+    app.view.addEventListener('click', (event) => {
+        toggleFullscreen();
+    });
 
-  return app
+    app.view.addEventListener('touchstart', (event) => {
+        toggleFullscreen();
+    });
+
+    return app
 }

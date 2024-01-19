@@ -72,9 +72,11 @@ class grpEle {
 
 // manages active containers
 class stageManager {
-  constructor(elements, active = []) {
+  constructor(elements, active = [], groups = {}) {
     this.elements = elements
     this.active = active;
+    this.groups = groups;
+    
     // add active elements to stage
     for (let i = 0; i < this.active.length; i++) {
       app.stage.addChild(this.elements[this.active[i]].container)
@@ -91,14 +93,26 @@ class stageManager {
     }
   }
 
-  // activate the next element 
-  activateNext() {
-    // get next element to activate
-    const maxAct_int = (!this.active.length) ? 0 : Math.max(...this.active)
-    if (maxAct_int < (this.elements.length - 1)) {
-      var nextAct_int = maxAct_int + 1
+  // activate the next element within the input array
+  activateNext(grp = undefined) {
+    // get relevant and active elements in groups
+    if (typeof grp !== 'undefined' && typeof this.groups !== 'undefined') {
+      var allEle_arr = this.groups[grp]
+      var actEle_arr = this.active.filter(i => allEle_arr.includes(i)) //
     } else {
-      var nextAct_int = 0
+      var allEle_arr = Array.from({ length: this.elements.length }, (_, index) => index);
+      var actEle_arr = this.active
+    }
+
+    // get last element activated
+    const lastAct_int = !(actEle_arr.length) ? undefined : actEle_arr[actEle_arr.length - 1]
+    // determine next element to active
+    if (typeof lastAct_int === 'undefined') { // no element activated so far -> begin at start
+      var nextAct_int = allEle_arr[0]
+    } else if (lastAct_int === allEle_arr[allEle_arr.length - 1]) { // element at end activated last -> go back to start
+      var nextAct_int = allEle_arr[0]
+    } else { // element in the middle activated last => go one step further
+      var nextAct_int = allEle_arr[allEle_arr.indexOf(lastAct_int) + 1]       
     }
 
     // activate if not activated yet

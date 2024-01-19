@@ -217,3 +217,36 @@ function mirror(container,p1_arr,p2_arr) { // container, first point of line, se
     container.position = {x: projX_fl, y: projY_fl}
   
   }
+
+
+// group n numbers into x equal grups
+function groupNumbers(x, n) {
+    const grpN_dic = {};
+
+    // initialize output dictionary
+    for (let i = 0; i < x; i++) {
+        grpN_dic[i] = [];
+    }
+
+    // assign numbers to dictionary
+    for (let i = 0; i < n; i++) {
+        var k = Math.floor(i / (n/x));
+        grpN_dic[k].push(i);
+    }
+
+    return grpN_dic;
+}
+
+// reverse a dictionary that uses arrays for values
+function revDic(dic) {
+    const revDic = {};
+    // loop over keys
+    for (const key in dic) {
+        const val = dic[key];
+        // loop over respective values
+        for (let i = 0; i < val.length; i++) {
+            revDic[val[i]] = key;
+        }   
+    }
+    return revDic;
+}

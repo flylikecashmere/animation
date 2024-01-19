@@ -1,13 +1,15 @@
 
-checkFps = false;
+checkFps = true;
 
 // load initialization script
 fpsMeter = loadFps(checkFps)
 
+// change color on double click
+var col_int = 0;
+
 // canvas setup
-const size_fl =  window.innerWidth // size in x-direction
+const size_fl =  window.innerWidth/2 // size in x-direction
 const rat_fl = window.outerHeight/window.innerWidth; // factor for size in y-direction
-const frmRat_int = 60; // frames per second
 
 const size = {x: size_fl, y: size_fl*rat_fl}
 
@@ -15,35 +17,46 @@ const size = {x: size_fl, y: size_fl*rat_fl}
 const tCons_arr = [0.25, 4, 16]
 const interTracker_obj = new interTracker(tCons_arr)
 
-// chance of bouncing
-const chBounce_fl = 0.0
-
 // control y-movement
-const ySinShr_fl = 0.2
-const yNoiDev_fl = 0.1
+const ySinShr_fl = 0.5
+const yNoiDev_fl = 0.2
 
 app = startCanvas() 
 
+// control colors
+window.addEventListener('keydown', (event) => {
+  if (event.key === "ArrowDown") {
+    col_int = 1;
+  } else if (event.key === "ArrowUp") {
+    col_int = 0;
+  }
+});
+
 // prepare large number of blobs and put into single object
-let crcStr_int = 300;
+let crcStr_int = 50;
 let crcStr_arr = new Array(crcStr_int);
 let rad_arr = new Array(crcStr_int);
 
-// desing of blobs
-let iFront_int = 30
+// create dictionary for grouping colors
+assCol_dic = groupNumbers(colorBlob_arr.length,crcStr_int)
+revAssCol_dic = revDic(assCol_dic)
+
+// design of blobs
+let iFront_int = 40
+let iTail_int = 40
 
 for (let i = 0; i < crcStr_arr.length; i++) {
   // compute and save radius
   const rnd_fl = jStat.poisson.sample(4)
-  let rad_fl = 0.02 * rnd_fl/4 * size_fl
+  let rad_fl = 1/(1.618 ** 10) * rnd_fl/4 * size_fl
   rad_arr[i] = rad_fl
   // select color scheme
-  color_arr = colorBlob_arr[i < crcStr_arr.length/2 ? 0 : 1]
+  color_arr = colorBlob_arr[revAssCol_dic[i]]
   // create blob
-  crcStr_arr[i] = createBlob(iFront_int, rad_fl, tCons_arr[1]*linInter(rnd_fl/8,0.7,1.3), 1.0, color_arr)
+  crcStr_arr[i] = createBlob(iFront_int, rad_fl, tCons_arr[1]*linInter(rnd_fl/10,1.618,0.618), iTail_int/iFront_int, color_arr)
 }
 
-allBlobs = new stageManager(crcStr_arr, [])
+allBlobs = new stageManager(crcStr_arr, [], assCol_dic)
 
 var elaTs_fl = 0.0
 
@@ -63,14 +76,14 @@ app.ticker.add(() => {
   // spawn new blob
   if (inter_arr[0]) {
    
-    next_int = allBlobs.activateNext()
+    next_int = allBlobs.activateNext(col_int)
     
     if (typeof next_int !== "undefined") {
-        // set reference frame
+      // set reference frame
       ele = allBlobs.elements[next_int]
       ele.refT = elaTs_fl + 0.8 * size.x / ele.speed
       // set y-position
-      yRel_fl = sinPlusRnd(interTracker_obj.passedInter(0),ySinShr_fl,yNoiDev_fl)
+      yRel_fl = sinPlusRnd(interTracker_obj.passedInter(1),ySinShr_fl,yNoiDev_fl)
       ele.container.y = 2 * rad_arr[next_int] + ( size.y - 4 * rad_arr[next_int] )  * yRel_fl
     }
   }
@@ -78,25 +91,23 @@ app.ticker.add(() => {
   // get blobs eligible for an update
   var relAct_arr = allBlobs.active.filter(i => allBlobs.elements[i].refT < elaTs_fl)
   if (!inter_arr[2]) {
-    // get blobs that touch border
+    // get blobs that touch border    
     var touch_arr = relAct_arr.filter((i) => checkBounds(allBlobs.elements[i].container,[["x","up"],["x","low"]],"touch"));
     // loop over blobs touching boundary
     for (let i = 0; i < touch_arr.length; i++) {
       ele = allBlobs.elements[touch_arr[i]]
       // reverse direction of blob
       ele.reverseDir()
-      // mirror blob
-      console.log(ele.container.x + ele.container.width)
-      for (let i = 0; i < ele.container.children.length; i++) {
-        if (ele.container.x  + ele.container.width < size.x) {
-          var delta_fl = 0
-        } else {
-          var delta_fl = 0
-        }
-        mirror(ele.container.children[i],[delta_fl,0],[delta_fl,size.y])
+      // get internal axis for mirror
+      if (ele.container.x  + ele.container.width > size.x) { 
+        var delta_fl = ele.container.children[0].x + ele.container.width/2 // right exit
+      } else { 
+        var delta_fl = ele.container.children[iFront_int*2 - 1].x + ele.container.width/2 // left exit
       }
-
-      
+      // mirror blob
+      for (let j = 0; j < ele.container.children.length; j++) {
+        mirror(ele.container.children[j],[delta_fl,0],[delta_fl,size.y])
+      }
       // update reference time
       ele.refT = elaTs_fl + 0.8 * size.x / ele.speed
     }
@@ -109,6 +120,7 @@ app.ticker.add(() => {
       var ele = allBlobs.elements[out_arr[i]]
       ele.shift(- ele.container.x,0);
     }
+
 
   }
 

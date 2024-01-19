@@ -13,7 +13,7 @@ function createBlob(iFront_int, r_fl, speed_fl, relTrail_fl,color_arr)  { //numb
     // create all lines
     for (let i = 0; i < lin_arr.length; i++) {
       // get color
-      const col_obj = new PIXI.Color(interpolateHexPal(color_arr, Math.max(...[0,(i-iTail_int)/iFront_int]))).toNumber(); 
+      col_obj = convertInterCol(color_arr,(i-iTail_int)/iFront_int)
 
       xVal_fl = (i - lin_arr.length) * wid_fl
       // create lines for front and tail of blob
@@ -31,8 +31,14 @@ function createBlob(iFront_int, r_fl, speed_fl, relTrail_fl,color_arr)  { //numb
 
 // return mix of sinus function plus random noise distributed uniform minus normal
 function sinPlusRnd(f,sinShr_fl,dev_fl) { // position-x sinus, weight between sinus and equal minus normal distributed randon value
-  rnd_val = sinShr_fl * linInter(Math.sin(2 * Math.PI * f), 0, 1, -1, 1) + (1 - sinShr_fl) * linInter(Math.random() - normalDis(0.5,dev_fl), 0.0, 1.0, - 3 * dev_fl, 3 * dev_fl);
+  const devFull_fl = Math.sqrt(1/12 + dev_fl ** 2, 2) // standard deviation of whole term
+  rnd_val = sinShr_fl * linInter(Math.sin(2 * Math.PI * f), 0, 1, -1, 1) + (1 - sinShr_fl) * linInter(Math.random() - normalDis(0.5,dev_fl), 0.0, 1.0, - 1.5 * devFull_fl, 1.5 * devFull_fl);
   return Math.min(1.0, Math.max(rnd_val, 0.0))
 }
 
+// interpolate color and convert to pixi object
+function convertInterCol(color_arr,x) {
+  const col_obj = new PIXI.Color(interpolateHexPal(color_arr, Math.max(...[0,x]))).toNumber(); 
+  return col_obj
+}
   
