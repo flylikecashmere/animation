@@ -38,9 +38,5 @@ function startCanvas() {
         toggleFullscreen();
     });
 
-    app.view.addEventListener('touchstart', (event) => {
-        toggleFullscreen();
-    });
-
     return app
 }

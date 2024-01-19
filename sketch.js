@@ -32,6 +32,14 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
+app.view.addEventListener('touchstart', (event) => {
+  if (col_int == 0) {
+    col_int = 1;
+  } else {
+    col_int = 0;
+  }
+});
+
 // prepare large number of blobs and put into single object
 let crcStr_int = 50;
 let crcStr_arr = new Array(crcStr_int);
