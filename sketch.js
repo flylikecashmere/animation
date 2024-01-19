@@ -6,6 +6,7 @@ fpsMeter = loadFps(checkFps)
 
 // change color on double click
 var col_int = 0;
+var blobBounce = true;
 
 // canvas setup
 const size_fl =  window.innerWidth // size in x-direction
@@ -13,8 +14,8 @@ const rat_fl = window.outerHeight/window.innerWidth; // factor for size in y-dir
 
 const size = {x: size_fl, y: size_fl*rat_fl}
 
-// constant time (in ms) and space constants
-const tCons_arr = [0.25, 4, 16]
+// constant time (in s) 
+const tCons_arr = [0.025, 4, 8]
 const interTracker_obj = new interTracker(tCons_arr)
 
 // control y-movement
@@ -41,7 +42,7 @@ app.view.addEventListener('touchstart', (event) => {
 });
 
 // prepare large number of blobs and put into single object
-let crcStr_int = 200;
+let crcStr_int = 400;
 let crcStr_arr = new Array(crcStr_int);
 let rad_arr = new Array(crcStr_int);
 
@@ -79,6 +80,15 @@ app.ticker.add(() => {
 
   // update time
   inter_arr = interTracker_obj.updateTracker(deltaTs_fl)
+  // change bounce setting
+  if (inter_arr[1]) {
+    if (blobBounce) {
+      blobBounce = false
+    } else {
+      blobBounce = true
+    }
+  }
+   
   elaTs_fl += deltaTs_fl
 
   // spawn new blob
@@ -98,7 +108,7 @@ app.ticker.add(() => {
 
   // get blobs eligible for an update
   var relAct_arr = allBlobs.active.filter(i => allBlobs.elements[i].refT < elaTs_fl)
-  if (!inter_arr[2]) {
+  if (blobBounce) {
     // get blobs that touch border    
     var touch_arr = relAct_arr.filter((i) => checkBounds(allBlobs.elements[i].container,[["x","up"],["x","low"]],"touch"));
     // loop over blobs touching boundary
@@ -128,8 +138,6 @@ app.ticker.add(() => {
       var ele = allBlobs.elements[out_arr[i]]
       ele.shift(- ele.container.x,0);
     }
-
-
   }
 
   if (checkFps) {
