@@ -1,6 +1,5 @@
 
-checkFps = false;
-
+checkFps = true;
 
 // load initialization script
 fpsMeter = loadFps(checkFps)
