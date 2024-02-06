@@ -48,10 +48,8 @@ function startCanvas() {
 
 // switch to fullscreen
 function toggleFullscreen() {
-    if (!document.fullscreenElement) {
+    if (document.documentElement.webkitRequestFullscreen) {
         document.documentElement.webkitRequestFullscreen();
-    } else {
-        document.webkitCancelFullScreen(); 
     }
 }
 
