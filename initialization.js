@@ -41,7 +41,7 @@ function startCanvas() {
   
     // toogle fullscreen on any action
     window.addEventListener('dblclick', (event) => {toggleFullscreen()});
-    hammer.on("dbltap", function(ev) {toggleFullscreen();});
+    hammer.on("panleft", function(ev) {toggleFullscreen();});
 
     return app
 }
