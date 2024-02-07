@@ -43,7 +43,7 @@ app.view.addEventListener('touchstart', (event) => {
 });
 */
 
-hammer.on("panleft", function(ev) {
+hammer.on("dbltap", function(ev) {
   if (col_int == 0) {
     col_int = 1;
   } else {
