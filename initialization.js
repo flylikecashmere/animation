@@ -49,6 +49,7 @@ function startCanvas() {
     return app
 }
 
+/*
 // switch to fullscreen
 function toggleFullscreen() {
     if (isSafari()) {
@@ -57,6 +58,16 @@ function toggleFullscreen() {
         } else { // iMac
             document.documentElement.webkitRequestFullscreen();
         }  
+    }
+}
+*/
+
+// function to switch to fullscreen
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        app.view.requestFullscreen();
+    } else {
+        document.exitFullscreen();
     }
 }
 
