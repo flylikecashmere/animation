@@ -43,9 +43,16 @@ function startCanvas() {
     document.body.appendChild(app.view);
   
     // toogle fullscreen on any action
+
+    /*
     window.addEventListener('dblclick', (event) => {toggleFullscreen()});
     hammer.on("panleft", function(ev) {toggleFullscreen();});
 
+    app.view.addEventListener('click', (event) => {
+        toggleFullscreen();
+    });
+    */
+   
     return app
 }
 
