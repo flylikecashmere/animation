@@ -44,39 +44,20 @@ function startCanvas() {
   
     // toogle fullscreen on any action
 
-    /*
     window.addEventListener('dblclick', (event) => {toggleFullscreen()});
     hammer.on("panleft", function(ev) {toggleFullscreen();});
 
-    app.view.addEventListener('click', (event) => {
-        toggleFullscreen();
-    });
-    */
-   
     return app
 }
 
-/*
+
 // switch to fullscreen
 function toggleFullscreen() {
     if (isSafari()) {
-        if (mobileDevice()) { // iPhone or iPad
-            app.view.requestFullscreen();
-        } else { // iMac
-            document.documentElement.webkitRequestFullscreen();
-        }  
+        document.documentElement.webkitRequestFullscreen();
     }
 }
-*/
 
-// function to switch to fullscreen
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        app.view.requestFullscreen();
-    } else {
-        document.exitFullscreen();
-    }
-}
 
 // resize when frame size changes
 window.addEventListener('resize', resize);
