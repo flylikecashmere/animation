@@ -33,12 +33,22 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
+/*
 app.view.addEventListener('touchstart', (event) => {
   if (col_int == 0) {
     col_int = 1;
   } else {
     col_int = 0;
   }
+});
+*/
+
+hammer.on("panleft", function(ev) {
+  if (col_int == 0) {
+    col_int = 1;
+  } else {
+    col_int = 0;
+  }  
 });
 
 // prepare large number of blobs and put into single object
