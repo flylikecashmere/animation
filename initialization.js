@@ -29,6 +29,9 @@ var doubleTap = new Hammer.Tap({
 // add the recognizer to the manager
 hammer.add(doubleTap);
 
+// define user agent as global variable
+var userAgent = navigator.userAgent.toLowerCase();
+
 function startCanvas() {    
 
     // create canvas
@@ -48,8 +51,12 @@ function startCanvas() {
 
 // switch to fullscreen
 function toggleFullscreen() {
-    if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.webkitRequestFullscreen();
+    if (isSafari()) {
+        if (mobileDevice()) { // iPhone or iPad
+            app.view.requestFullscreen();
+        } else { // iMac
+            document.documentElement.webkitRequestFullscreen();
+        }  
     }
 }
 
@@ -59,3 +66,26 @@ window.addEventListener('resize', resize);
 function resize() {
 	app.renderer.resize(window.innerWidth, window.innerHeight);
 }
+
+// brower detection
+function isSafari() {
+    var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+    return isSafari
+}
+
+
+// device detection
+function mobileDevice() {
+    if(userAgent.includes("mobi") || userAgent.includes("tablet")){
+       return true;
+    }
+    if(userAgent.includes("android")) {
+       if(window.height > window.width && window.width < 800) {
+          return true;
+       }
+       if(window.width > window.height && window.height < 800) {
+          return true;
+       }
+    }
+    return false;
+ }
