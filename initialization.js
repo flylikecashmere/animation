@@ -55,6 +55,8 @@ function startCanvas() {
 function toggleFullscreen() {
     if (isSafari()) {
         document.documentElement.webkitRequestFullscreen();
+    } else {
+        document.documentElement.requestFullscreen();
     }
 }
 
