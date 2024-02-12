@@ -14,8 +14,10 @@ function loadFps(checkFps) {
     }
 }
 
-// create a simple instance
+
+// create hammer instances
 var hammer = new Hammer(document);
+var hammerManager = new Hammer.Manager(document);
 
 // let the pan gesture support all directions
 hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
@@ -27,7 +29,7 @@ var doubleTap = new Hammer.Tap({
   });
   
 // add the recognizer to the manager
-hammer.add(doubleTap);
+hammerManager.add(doubleTap);
 
 // define user agent as global variable
 var userAgent = navigator.userAgent.toLowerCase();
@@ -44,8 +46,8 @@ function startCanvas() {
   
     // toogle fullscreen on any action
 
-    window.addEventListener('dblclick', (event) => {toggleFullscreen()});
-    //hammer.on("panleft", function(ev) {toggleFullscreen();});
+    //window.addEventListener('dblclick', (event) => {toggleFullscreen()});  
+    hammerManager.on("dbltap", function(ev) {toggleFullscreen();});
 
     return app
 }
