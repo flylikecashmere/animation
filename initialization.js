@@ -26,7 +26,7 @@ hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 var doubleTap = new Hammer.Tap({
     event: 'dbltap',
     taps: 2
-  });
+});
   
 // add the recognizer to the manager
 hammerManager.add(doubleTap);
@@ -55,7 +55,7 @@ function startCanvas() {
 
 // switch to fullscreen
 function toggleFullscreen() {
-    if (isSafari()) {
+    if (document.documentElement.webkitRequestFullscreen) {
         document.documentElement.webkitRequestFullscreen();
     } else {
         document.documentElement.requestFullscreen();
