@@ -44,9 +44,8 @@ function startCanvas() {
     });
     document.body.appendChild(app.view);
   
-    // toogle fullscreen on any action
-
-    //window.addEventListener('dblclick', (event) => {toggleFullscreen()});  
+    // toogle fullscreen
+    window.addEventListener('dblclick', (event) => {toggleFullscreen()});  
     hammerManager.on("dbltap", function(ev) {toggleFullscreen();});
 
     return app
@@ -55,10 +54,12 @@ function startCanvas() {
 
 // switch to fullscreen
 function toggleFullscreen() {
-    if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.webkitRequestFullscreen();
-    } else {
+    if (document.documentElement.requestFullscreen) { // mozilla
         document.documentElement.requestFullscreen();
+    } else if (document.documentElement.webkitRequestFullscreen) { // safari
+        document.documentElement.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // ie11
+        document.documentElement.msRequestFullscreen();
     }
 }
 
