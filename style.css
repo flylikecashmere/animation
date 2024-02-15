@@ -18,7 +18,7 @@ body {
   color: white;
   padding: 20px;
   border-radius: 5px;
-  animation: fadeInOut 3s forwards; /* Apply fade in and fade out animation */
+  animation: fadeInOut 2s forwards; /* Apply fade in and fade out animation */
 }
 
 @keyframes fadeInOut {
