@@ -1,4 +1,5 @@
-// load fps tracker
+// #region initialize fps tracker
+
 function loadFps(checkFps) {
     if (checkFps) {
         const fpsMeter = new FPSMeter({
@@ -14,6 +15,9 @@ function loadFps(checkFps) {
     }
 }
 
+// #endregion
+
+// #region initialize hammer (= tracks swipes)
 
 // create hammer instances
 var hammer = new Hammer(document);
@@ -31,8 +35,9 @@ var doubleTap = new Hammer.Tap({
 // add the recognizer to the manager
 hammerManager.add(doubleTap);
 
-// define user agent as global variable
-var userAgent = navigator.userAgent.toLowerCase();
+// #endregion
+
+// #region initialize canvas with fullscreen and resizing
 
 function startCanvas() {    
 
@@ -51,7 +56,6 @@ function startCanvas() {
     return app
 }
 
-
 // switch to fullscreen
 function toggleFullscreen() {
     if (document.documentElement.requestFullscreen) { // mozilla
@@ -63,33 +67,31 @@ function toggleFullscreen() {
     }
 }
 
-
 // resize when frame size changes
 window.addEventListener('resize', resize);
 
 function resize() {
 	app.renderer.resize(window.innerWidth, window.innerHeight);
+    const size = {x: window.innerWidth, y: window.innerHeight}
 }
 
-// brower detection
-function isSafari() {
-    var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
-    return isSafari
+// #endregion
+
+// #region show message for fullscreen
+
+// define user agent as global variable
+var userAgent = navigator.userAgent.toLowerCase();
+
+// get message element
+var message = document.getElementById('message');
+
+// show device specific message
+if (/iPhone|iPod/i.test(userAgent)) {
+    message.textContent = ""; // no full screen support
+} else if (/Android/i.test(userAgent) || /Windows Phone/i.test(userAgent) || /iPad/i.test(userAgent)) {
+    message.textContent = "Double-tap for fullscreen";
+} else {
+    message.textContent = "Double-click for fullscreen";
 }
 
-
-// device detection
-function mobileDevice() {
-    if(userAgent.includes("mobi") || userAgent.includes("tablet")){
-       return true;
-    }
-    if(userAgent.includes("android")) {
-       if(window.height > window.width && window.width < 800) {
-          return true;
-       }
-       if(window.width > window.height && window.height < 800) {
-          return true;
-       }
-    }
-    return false;
- }
+// #endregion

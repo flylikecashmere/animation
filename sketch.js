@@ -1,5 +1,5 @@
 
-checkFps = true;
+checkFps = false;
 
 // load initialization script
 fpsMeter = loadFps(checkFps)
@@ -145,3 +145,6 @@ app.ticker.add(() => {
   }
   
 });
+
+// show fullscreen message
+// test sound
