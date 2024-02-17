@@ -85,6 +85,7 @@ var userAgent = navigator.userAgent.toLowerCase();
 // get message element
 var message = document.getElementById('message');
 
+/*
 // show device specific message
 if (/iPhone|iPod/i.test(userAgent)) { // iPhone (no full screen support)
     if (window.matchMedia("(orientation: portrait)").matches) {
@@ -101,5 +102,26 @@ if (/iPhone|iPod/i.test(userAgent)) { // iPhone (no full screen support)
 } else {
     message.textContent = "Double-click for fullscreen";
 }
+*/
+
+function detectAppleDevice() {
+  // Check for iOS Safari browser
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.platform) && !window.MSStream;
+  
+  if (isIOS) {
+    // Determine if it's an iPad or iPhone
+    if (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) {
+      return 'iPad';
+    } else {
+      return 'iPhone';
+    }
+  } else {
+    return 'Not an iPad or iPhone';
+  }
+}
+
+// Example usage:
+var deviceType = detectAppleDevice();
+message.textContent = deviceType;
 
 // #endregion
