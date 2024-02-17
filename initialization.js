@@ -99,7 +99,7 @@ if (/iPhone|iPod/i.test(userAgent)) { // no full screen support
         message.textContent = "Double-tap for fullscreen";
     }
 } else {
-    message.textContent = "Double-click for fullscreen";
+    message.textContent = userAgent;
 }
 
 // #endregion
