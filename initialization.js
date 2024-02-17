@@ -19,7 +19,7 @@ function loadFps(checkFps) {
 
 // #region initialize hammer (= tracks swipes)
 
-// create hammer instances
+// screate hammer instances
 var hammer = new Hammer(document);
 var hammerManager = new Hammer.Manager(document);
 
@@ -86,10 +86,18 @@ var userAgent = navigator.userAgent.toLowerCase();
 var message = document.getElementById('message');
 
 // show device specific message
-if (/iPhone|iPod/i.test(userAgent)) {
-    message.textContent = ""; // no full screen support
+if (/iPhone|iPod/i.test(userAgent)) { // no full screen support
+    if (window.matchMedia("(orientation: portrait)").matches) {
+        message.textContent = "Hold horizontally";
+    } else {
+        message.textContent = "";
+    }
 } else if (/Android/i.test(userAgent) || /Windows Phone/i.test(userAgent) || /iPad/i.test(userAgent)) {
-    message.textContent = "Double-tap for fullscreen";
+    if (window.matchMedia("(orientation: portrait)").matches) {
+        message.textContent = "Double-tap for fullscreen and hold horizontally";
+    } else {
+        message.textContent = "Double-tap for fullscreen";
+    }
 } else {
     message.textContent = "Double-click for fullscreen";
 }

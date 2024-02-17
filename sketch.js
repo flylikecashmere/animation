@@ -146,5 +146,5 @@ app.ticker.add(() => {
   
 });
 
-// show fullscreen message
-// test sound
+// re-skalierung
+// andere messages

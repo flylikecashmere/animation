@@ -18,6 +18,7 @@ body {
   color: white;
   padding: 20px;
   border-radius: 5px;
+  font-family: Arial, sans-serif;
   animation: fadeInOut 2s forwards; /* Apply fade in and fade out animation */
 }
 
