@@ -71,8 +71,10 @@ function toggleFullscreen() {
 window.addEventListener('resize', resize);
 
 function resize() {
+    // re-size renderer
 	app.renderer.resize(window.innerWidth, window.innerHeight);
-    const size = {x: window.innerWidth, y: window.innerHeight}
+    // update size object
+    size = {x: window.innerWidth, y: window.innerHeight}
 }
 
 // #endregion
