@@ -86,20 +86,20 @@ var userAgent = navigator.userAgent.toLowerCase();
 var message = document.getElementById('message');
 
 // show device specific message
-if (/iPhone|iPod/i.test(userAgent)) { // no full screen support
+if (/iPhone|iPod/i.test(userAgent)) { // iPhone (no full screen support)
     if (window.matchMedia("(orientation: portrait)").matches) {
         message.textContent = "Hold horizontally";
     } else {
         message.textContent = "";
     }
-} else if (/Android/i.test(userAgent) || /Windows Phone/i.test(userAgent) || /iPad/i.test(userAgent)) {
+} else if (/Android/i.test(userAgent) || /Windows Phone/i.test(userAgent) || ( /iPad|iPhone|iPod/.test(navigator.platform) && !window.MSStream && navigator.maxTouchPoints && navigator.maxTouchPoints > 2)) { // other mobile devices
     if (window.matchMedia("(orientation: portrait)").matches) {
         message.textContent = "Double-tap for fullscreen and hold horizontally";
-    } else {
+    } else { // desktop computer
         message.textContent = "Double-tap for fullscreen";
     }
 } else {
-    message.textContent = userAgent;
+    message.textContent = "Double-click for fullscreen";
 }
 
 // #endregion
