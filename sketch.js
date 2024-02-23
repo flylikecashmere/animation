@@ -1,4 +1,5 @@
 
+
 checkFps = false;
 
 // load initialization script
@@ -12,7 +13,7 @@ var blobBounce = true;
 const size_fl =  window.innerWidth // size in x-direction
 const rat_fl = window.outerHeight/window.innerWidth; // factor for size in y-direction
 
-const size = {x: size_fl, y: size_fl*rat_fl}
+size = {x: size_fl, y: size_fl*rat_fl}
 
 // constant time (in s) 
 const tCons_arr = [0.025, 4, 8]
@@ -23,23 +24,6 @@ const ySinShr_fl = 0.5
 const yNoiDev_fl = 0.2
 
 app = startCanvas() 
-
-// control colors
-window.addEventListener('keydown', (event) => {
-  if (event.key === "ArrowDown") {
-    col_int = 1;
-  } else if (event.key === "ArrowUp") {
-    col_int = 0;
-  }
-});
-
-hammer.on("panleft", function(ev) {
-  if (col_int == 0) {
-    col_int = 1;
-  } else {
-    col_int = 0;
-  }  
-});
 
 // prepare large number of blobs and put into single object
 let crcStr_int = 400;
@@ -143,8 +127,10 @@ app.ticker.add(() => {
   if (checkFps) {
     fpsMeter.tick();
   }
-  
 });
 
-// re-skalierung
-// andere messages
+
+// edit sound: loop sauber, pad cleaner
+// add that anything can trigger start
+// rework experience (messages after each other, blend in symbols for turn, encougage to tap, fade-in sound)
+// rework optiks (blaue linien, blobs better)

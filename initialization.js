@@ -37,6 +37,64 @@ hammerManager.add(doubleTap);
 
 // #endregion
 
+// #region load audio
+
+var intro_mp3 = new Howl({src: ["media/intro.mp3"], loop: false, volume: 1.0})
+var loop_mp3 = new Howl({src: ["media/loop.mp3"], loop: true, volume: 1.0})
+var pad1_mp3 = new Howl({src: ["media/pad1.mp3"], loop: false, volume: 0.5})
+var pad2_mp3 = new Howl({src: ["media/pad2.mp3"], loop: false, volume: 0.5})
+
+// #endregion
+
+
+// #region controll playing of sound
+var startSound_boo = false;
+var loopSound_boo = false;
+
+// event listeners to start sound
+window.addEventListener('dblclick', (event) => {startSound()});  
+hammerManager.on("dbltap", function(ev) {startSound();});
+
+// start sound on first user interaction
+function startSound(event) {
+    if (!loopSound_boo && !startSound_boo) {
+        intro_mp3.play();
+        startSound_boo = true;
+    }
+}
+
+// start loop after intro has played
+intro_mp3.on('end', function() {
+    loop_mp3.play();
+    loopSound_boo = true;
+});
+
+// play sound on taps in left or right half
+window.addEventListener("click", function(event) {
+    if (loopSound_boo) {
+        if (event.clientX  < size.x / 2) {
+            pad1_mp3.play()
+        } else {
+            pad2_mp3.play()
+        }
+    }
+    console.log(loopSound_boo)
+});
+
+hammer.on("tap", function(event) {
+    if (loopSound_boo) {
+        if (event.center.x  < size.x / 2) {
+            pad1_mp3.play()
+        } else {
+            pad2_mp3.play()
+        }
+    }
+});
+
+
+
+// #endregion
+
 // #region initialize canvas with fullscreen and resizing
 
 function startCanvas() {    
@@ -107,3 +165,7 @@ if (/iPhone|iPod/i.test(userAgent)) { // iPhone (no full screen support)
 
 
 // #endregion
+
+
+
+
