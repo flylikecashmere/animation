@@ -39,7 +39,6 @@ hammerManager.add(doubleTap);
 
 // #region load audio
 
-var intro_mp3 = new Howl({src: ["media/intro.mp3"], loop: false, volume: 1.0})
 var loop_mp3 = new Howl({src: ["media/loop.mp3"], loop: true, volume: 1.0})
 var pad1_mp3 = new Howl({src: ["media/pad1.mp3"], loop: false, volume: 0.5})
 var pad2_mp3 = new Howl({src: ["media/pad2.mp3"], loop: false, volume: 0.5})
@@ -49,40 +48,39 @@ var pad2_mp3 = new Howl({src: ["media/pad2.mp3"], loop: false, volume: 0.5})
 
 // #region controll playing of sound
 var startSound_boo = false;
-var loopSound_boo = false;
 
 // event listeners to start sound
 window.addEventListener('dblclick', (event) => {startSound()});  
 hammerManager.on("dbltap", function(ev) {startSound();});
 
+var start_tm = 0;
+
 // start sound on first user interaction
 function startSound(event) {
-    if (!loopSound_boo && !startSound_boo) {
-        intro_mp3.play();
+    if (!startSound_boo) {
+        loop_mp3.play();
         startSound_boo = true;
+        start_tm = new Date().getTime();
+        console.log("hallo")
     }
 }
 
-// start loop after intro has played
-intro_mp3.on('end', function() {
-    loop_mp3.play();
-    loopSound_boo = true;
-});
-
 // play sound on taps in left or right half
 window.addEventListener("click", function(event) {
-    if (loopSound_boo) {
+    var cur_tm = new Date().getTime();
+    console.log(cur_tm - start_tm)
+    if (startSound_boo && cur_tm - start_tm > 10) {
         if (event.clientX  < size.x / 2) {
             pad1_mp3.play()
         } else {
             pad2_mp3.play()
         }
     }
-    console.log(loopSound_boo)
 });
 
 hammer.on("tap", function(event) {
-    if (loopSound_boo) {
+    var cur_tm = new Date().getTime();
+    if (startSound_boo && cur_tm - start_tm > 10) {
         if (event.center.x  < size.x / 2) {
             pad1_mp3.play()
         } else {
