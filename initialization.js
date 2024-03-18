@@ -40,13 +40,13 @@ hammerManager.add(doubleTap);
 // #region load audio
 
 var loop_mp3 = new Howl({src: ["media/loop.mp3"], loop: true, volume: 1.0})
-var pad1_mp3 = new Howl({src: ["media/pad1.mp3"], loop: false, volume: 0.5})
-var pad2_mp3 = new Howl({src: ["media/pad2.mp3"], loop: false, volume: 0.5})
+var pad1_mp3 = new Howl({src: ["media/pad1.mp3"], loop: false, volume: 0.15})
+var pad2_mp3 = new Howl({src: ["media/pad2.mp3"], loop: false, volume: 0.15 })
 
 // #endregion
 
 
-// #region controll playing of sound
+// #region control playing of sound
 var startSound_boo = false;
 
 // event listeners to start sound
@@ -71,9 +71,20 @@ window.addEventListener("click", function(event) {
     console.log(cur_tm - start_tm)
     if (startSound_boo && cur_tm - start_tm > 10) {
         if (event.clientX  < size.x / 2) {
-            pad1_mp3.play()
+            // pad1_mp3.play()
+
+            next_int = allBlobs.activateNext(col_int)
+    
+            
+            // set reference frame
+            ele = allBlobs.elements[next_int]
+            ele.refT = elaTs_fl + 0.8 * size.x / ele.speed
+            // set y-position
+            yRel_fl = sinPlusRnd(interTracker_obj.passedInter(1),ySinShr_fl,yNoiDev_fl)
+            ele.container.y = 2 * rad_arr[next_int] + ( size.y - 4 * rad_arr[next_int] )  * yRel_fl
+
         } else {
-            pad2_mp3.play()
+            // pad2_mp3.play()
         }
     }
 });
@@ -82,9 +93,9 @@ hammer.on("tap", function(event) {
     var cur_tm = new Date().getTime();
     if (startSound_boo && cur_tm - start_tm > 10) {
         if (event.center.x  < size.x / 2) {
-            pad1_mp3.play()
+            // pad1_mp3.play()
         } else {
-            pad2_mp3.play()
+            // pad2_mp3.play()
         }
     }
 });
@@ -164,6 +175,11 @@ if (/iPhone|iPod/i.test(userAgent)) { // iPhone (no full screen support)
 
 // #endregion
 
+// #region touch feedback
 
+// add circle where the screen is clicked
+window.addEventListener('click', (event) => {
+    createTouchCircle(event.clientX, event.clientY, size.x * 1/(1.618 ** 10), colorBlob_arr[0][0]);
+});
 
-
+// #endregion

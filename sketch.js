@@ -31,10 +31,11 @@ let crcStr_arr = new Array(crcStr_int);
 let rad_arr = new Array(crcStr_int);
 
 // create dictionary for grouping colors
-assCol_dic = groupNumbers(colorBlob_arr.length,crcStr_int)
+assCol_dic = groupNumbers(colorBlob_arr.length, crcStr_int)
 revAssCol_dic = revDic(assCol_dic)
 
 // design of blobs
+
 let iFront_int = 40
 let iTail_int = 40
 
@@ -76,19 +77,6 @@ app.ticker.add(() => {
   elaTs_fl += deltaTs_fl
 
   // spawn new blob
-  if (inter_arr[0]) {
-   
-    next_int = allBlobs.activateNext(col_int)
-    
-    if (typeof next_int !== "undefined") {
-      // set reference frame
-      ele = allBlobs.elements[next_int]
-      ele.refT = elaTs_fl + 0.8 * size.x / ele.speed
-      // set y-position
-      yRel_fl = sinPlusRnd(interTracker_obj.passedInter(1),ySinShr_fl,yNoiDev_fl)
-      ele.container.y = 2 * rad_arr[next_int] + ( size.y - 4 * rad_arr[next_int] )  * yRel_fl
-    }
-  }
 
   // get blobs eligible for an update
   var relAct_arr = allBlobs.active.filter(i => allBlobs.elements[i].refT < elaTs_fl)
@@ -130,7 +118,4 @@ app.ticker.add(() => {
 });
 
 
-// edit sound: loop sauber, pad cleaner
-// add that anything can trigger start
-// rework experience (messages after each other, blend in symbols for turn, encougage to tap, fade-in sound)
-// rework optiks (blaue linien, blobs better)
+

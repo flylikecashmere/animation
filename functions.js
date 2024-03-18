@@ -4,7 +4,7 @@ function randEle(vector) {
 }
 
 // distribute range 'inter' into 'step' steps with given 'ratio' corrected by 'scale'
-function distVal(ratio,sca,step,inter,type) {
+function distVal(ratio, sca, step, inter, type) {
    
     let step_arr = new Array(step);
     let stepSum_fl = 0.0;
@@ -30,7 +30,7 @@ function distVal(ratio,sca,step,inter,type) {
 
 // get y coordinate of circle from rel position of x and radius
 function getCircleY(relX, rad) {
-    return Math.sqrt(Math.pow(rad, 2) - Math.pow(relX*rad, 2));
+    return Math.sqrt(Math.pow(rad, 2) - Math.pow(relX * rad, 2));
 }
   
 // linear interpolation
@@ -50,7 +50,7 @@ function subArr(arr1, arr2) {
 
 // normalize length of direction vector
 function normalizeDir(dir_arr) {
-    vecL_fl = Math.sqrt(Math.pow(dir_arr[0],2) + Math.pow(dir_arr[1],2))
+    vecL_fl = Math.sqrt(Math.pow(dir_arr[0], 2) + Math.pow(dir_arr[1], 2))
     return dir_arr.map(function(x) { return x / vecL_fl; })
 }
 
@@ -65,7 +65,7 @@ function standardNormalDis() {
 }
 
 // get random value from normal distribution
-function normalDis(mean,stdDev) {
+function normalDis(mean, stdDev) {
     return mean + standardNormalDis() * stdDev
 }
 
@@ -91,7 +91,7 @@ function diffArr(arr1, arr2) { // array with all elements, array with elements t
 }
 
 // check if elements touch limit
-function touchLimit(bounds_dic,check) { // array of graphic elements, string array with type of check and dimension
+function touchLimit(bounds_dic, check) { // array of graphic elements, string array with type of check and dimension
     if (check[1] === "up") {
       var check_boo = bounds_dic[check[0]][0] + bounds_dic[check[0]][1] > size[check[0]]
     } else if (check[1] === "low") {
@@ -101,7 +101,7 @@ function touchLimit(bounds_dic,check) { // array of graphic elements, string arr
 }
 
 // check if elements are out of limit
-function outLimit(bounds_dic,check) { // array of graphic elements, string array with type of check and dimension
+function outLimit(bounds_dic, check) { // array of graphic elements, string array with type of check and dimension
     if (check[1] === "up") {
         var check_boo = bounds_dic[check[0]][0] > size[check[0]] 
     } else if (check[1] === "low") {
@@ -143,16 +143,16 @@ function interpolateHex(hex1_str, hex2_str , x) { // first color as hex, second 
 }
 
 // linear interpolation over a range of colors
-function interpolateHexPal(hex_arr,x) { // array of hex colors, relative value of value in range
+function interpolateHexPal(hex_arr, x) { // array of hex colors, relative value of value in range
     
     // get id of first color for iteration
     start_int = Math.floor(x * (hex_arr.length - 1))
     // do interpolation and return
-    return interpolateHex(hex_arr[start_int],hex_arr[start_int + 1],x - start_int / (hex_arr.length - 1))
+    return interpolateHex(hex_arr[start_int], hex_arr[start_int + 1], x - start_int / (hex_arr.length - 1))
 }    
 
 // check if object is in screen
-function checkBounds(obj,dim,type) { // object to check, dimensions and directions to check, touch or completely out
+function checkBounds(obj, dim, type) { // object to check, dimensions and directions to check, touch or completely out
 
     const bounds_obj = obj.getBounds();
     const bounds_dic = {x: [bounds_obj.x, bounds_obj.width], y: [bounds_obj.y, bounds_obj.height]}
@@ -163,13 +163,13 @@ function checkBounds(obj,dim,type) { // object to check, dimensions and directio
         
         if (type === "touch") { // check if object is touches screen limits (only has to be true for one check)
 
-            if (touchLimit(bounds_dic,dim[j])) { 
+            if (touchLimit(bounds_dic, dim[j])) { 
                 out_boo = true
                 break
             }
 
         } else if (type === "out") { // check if object is completely outside of screen limits (must be true for all checks)
-            if (out_boo && outLimit(bounds_dic,dim[j]))  { 
+            if (out_boo && outLimit(bounds_dic, dim[j]))  { 
                 out_boo = true
             } else {
                 out_boo = false
@@ -190,7 +190,7 @@ function pArrToDic(pArr) {
 }
 
 // changes position of container to point mirrored on line
-function mirror(container,p1_arr,p2_arr) { // container, first point of line, second point of line
+function mirror(container, p1_arr, p2_arr) { // container, first point of line, second point of line
 
     // get center of of container
     const cent_arr = [container.x, container.y];
@@ -219,7 +219,7 @@ function mirror(container,p1_arr,p2_arr) { // container, first point of line, se
   }
 
 
-// group n numbers into x equal grups
+// group n numbers into x equal groups
 function groupNumbers(x, n) {
     const grpN_dic = {};
 
@@ -250,3 +250,41 @@ function revDic(dic) {
     }
     return revDic;
 }
+
+
+function createTouchCircle(x_fl, y_fl, rad_fl, col_str) {
+    
+    // create circle container
+    const circlCont = new PIXI.Container();
+    app.stage.addChild(circlCont);
+  
+    // create circle graphics
+    const circlGra = new PIXI.Graphics();
+    circlCont.addChild(circlGra);
+  
+    // set position of the circle
+    circlCont.position.set(x_fl, y_fl);
+  
+    // define radius, duration, frames
+    const dur_fl = 1000; // in milliseconds
+    const steps_int = 60;
+    const stepDuration = dur_fl / steps_int;
+  
+    // animation
+    let s = 0;
+    const animate = () => {
+      circlGra.clear();
+      circlGra.beginFill(col_str, (steps_int - s) / steps_int); // set white fill color with decreasing alpha
+      circlGra.drawCircle(0, 0, rad_fl * (s / steps_int));
+      circlGra.endFill();
+      s++;
+  
+      if (s <= steps_int) {
+        requestAnimationFrame(animate);
+      } else {
+        app.stage.removeChild(circlCont);
+      }
+    };
+  
+    animate();
+  }
