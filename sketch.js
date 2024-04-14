@@ -36,14 +36,13 @@ window.addEventListener('mousedown', (event) => {
 });
 
 hammer.on("panstart", function(event) {
-  //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
-  app.renderer.backgroundColor = 0xFF0000;
+  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
 });
 
-hammer.on("tap", function(event) {
-  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
+//hammer.on("tap", function(event) {
+  //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
   //app.renderer.backgroundColor = 0xCCCCCC;
-});
+//});
 
 window.addEventListener('mouseup', (event) => {
 
