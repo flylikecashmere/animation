@@ -41,8 +41,8 @@ hammer.on("panstart", function(event) {
 });
 
 hammer.on("tap", function(event) {
-  //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
-  app.renderer.backgroundColor = 0xCCCCCC;
+  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
+  //app.renderer.backgroundColor = 0xCCCCCC;
 });
 
 window.addEventListener('mouseup', (event) => {
