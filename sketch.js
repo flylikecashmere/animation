@@ -35,7 +35,7 @@ window.addEventListener('mousedown', (event) => {
 
 });
 
-hammer.on("touchstart", function(event) {
+hammer.on("press", function(event) {
   aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
 });
 
@@ -52,7 +52,7 @@ window.addEventListener('mouseup', (event) => {
   
 });
 
-window.addEventListener('touchend', (event) => {
+hammer.on("pressup", function(event) {
 
   aniCircle_arr[act_int].repeatCircle()
   
