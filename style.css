@@ -5,9 +5,11 @@ canvas {
 body {
   margin: 0;
   padding: 0;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #f0f0f0; /* Optional background color */
 }
 
 #message {
@@ -16,7 +18,6 @@ body {
   color: white;
   padding: 20px;
   border-radius: 5px;
-  font-family: Arial, sans-serif;
   animation: fadeInOut 2s forwards; /* Apply fade in and fade out animation */
 }
 

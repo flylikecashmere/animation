@@ -1,155 +1,124 @@
-// nuclear graphic objects
-class Nuc {
+
+
+
+class aniCircle {
   constructor() {
-    this.graphic = new PIXI.Graphics();
-  }
-}
+    this.pos = {x: 0, y: 0}
+    this.crc = new PIXI.Graphics(); // graphic object
+    this.isDraw = false; // is circle currently being drawn?
+    this.clcElp = 0; // time per repetition of circle
+    this.col = "#F00000"
 
-// grapic line object
-class Line extends Nuc {
-  constructor(startX, startY, endX, endY, col, wid, alp = 1.0) {
-    super();
-    // style of line
-    this.graphic.lineStyle(wid, col, alp); 
-    // compute middle point at set as position and pivot
-    let mid_arr = [(startX + endX)/2, (startY + endY)/2]
-    this.graphic.position =  {x: mid_arr[0], y: mid_arr[1]};
-    // set starting and end coordinate
-    this.graphic.moveTo(startX - mid_arr[0], startY - mid_arr[1]);
-    this.graphic.lineTo(endX - mid_arr[0], endY - mid_arr[1]);
-  }
-}
-
-// group of containers
-class grpEle {
-  constructor(elements, timeX = 1.0, dir = [1,0], t = 0) {
-    // put graphics object into container
-    this.elements = elements
-    this.container = new PIXI.Container();
-    for (let i = 0; i < this.elements.length; i++) {
-      const ele = this.elements[i]
-      if ('graphic' in ele) {
-        this.container.addChild(this.elements[i].graphic);
-      } else {
-        this.container.addChild(this.elements[i].container);
-      }   
-    }
-    this.speed = computeSpeed(timeX); // speed of movement
-    this.dir = normalizeDir(dir); // normalized direction of movement
-    this.refT = t // reference time 
+    // create synth
+    this.synth = new Tone.FMSynth().toDestination();
   }
 
-  shift(x,y) {
-    this.container.x += x;
-    this.container.y += y;
-  }
+  startCircle(x_fl, y_fl) {
+    const clcStrt_time = Date.now();
+    this.isDraw = true;
+    this.crc.clear();
+    this.pos = {x: x_fl, y: y_fl}
 
-  move(t) {
-    this.shift(t * this.dir[0] * this.speed, t * this.dir[1] * this.speed)
-  }
-
-  changeSpeed(timeX) {
-    this.speed = computeSpeed(timeX);
-  }
-
-  setDir(dir) {
-    this.dir = normalizeDir(dir);
-  }
-
-  reverseDir() {
-    this.dir = this.dir .map(x => x * -1)  
-  }
-
-  mirror(p1_arr,p2_arr) { // container, first point of line, second points of line
-    this.container.children.forEach(child => {
-      const mirP_arr = mirrorPoint(pDicToArr(child.getGlobalPosition()), p1_arr, p2_arr);
-      child.x = this.container.x + mirP_arr[0]
-      child.y = this.container.y + mirP_arr[1]
-    });
-  }
-
-}
-
-// manages active containers
-class stageManager {
-  constructor(elements, active = [], groups = {}) {
-    this.elements = elements
-    this.active = active;
-    this.groups = groups;
-    
-    // add active elements to stage
-    for (let i = 0; i < this.active.length; i++) {
-      app.stage.addChild(this.elements[this.active[i]].container)
-    }
-  }
-
-  // de-activate elements in array
-  deactivate(deact) {
-    // update array attribute
-    this.active = this.active.filter(i => !deact.includes(i))
-    // remove from stage
-    for (let i = 0; i < deact.length; i++) {
-      app.stage.removeChild(this.elements[deact[i]].container)
-    }
-  }
-
-  // activate the next element within the input array
-  activateNext(grp = undefined) {
-    // get relevant and active elements in groups
-    if (typeof grp !== 'undefined' && typeof this.groups !== 'undefined') {
-      var allEle_arr = this.groups[grp]
-      var actEle_arr = this.active.filter(i => allEle_arr.includes(i)) //
-    } else {
-      var allEle_arr = Array.from({ length: this.elements.length }, (_, index) => index);
-      var actEle_arr = this.active
-    }
-
-    // get last element activated
-    const lastAct_int = !(actEle_arr.length) ? undefined : actEle_arr[actEle_arr.length - 1]
-    // determine next element to active
-    if (typeof lastAct_int === 'undefined') { // no element activated so far -> begin at start
-      var nextAct_int = allEle_arr[0]
-    } else if (lastAct_int === allEle_arr[allEle_arr.length - 1]) { // element at end activated last -> go back to start
-      var nextAct_int = allEle_arr[0]
-    } else { // element in the middle activated last => go one step further
-      var nextAct_int = allEle_arr[allEle_arr.indexOf(lastAct_int) + 1]       
-    }
-
-    // activate if not activated yet
-    if (!this.active.includes(nextAct_int)) {
-      // add to array
-      this.active.push(nextAct_int);
-      // add to stage
-      app.stage.addChild(this.elements[nextAct_int].container)
-      return nextAct_int
-    }
-  }
-}
-
-class interTracker {
-  constructor(tsInter_arr) {
-    this.inter = tsInter_arr
-    this.pass = new Array(tsInter_arr.length).fill(0.0);
-  }
-
-  // update time-tracking
-  updateTracker(t) { // passed time in seconds
-    // update array of passed time
-    this.pass = this.pass.map((i) => i + t);
-    var reSet_arr = new Array(this.inter.length).fill(false);
-    // check if passed time exceeds interval
-    for (let i = 0; i < this.inter.length; i++) {
-      
-      if (this.inter[i] < this.pass[i]) {
-        this.pass[i] = this.inter[i] - this.pass[i]
-        reSet_arr[i] = true
+    // adjust tone
+    var synthJSON = {
+      "harmonicity":10 * this.pos.x / size.x,
+      "modulationIndex": 10 * this.pos.y / size.y,
+      "oscillator" : {
+          "type": "sine"
+      },
+      "envelope": {
+          "attack": 0.001,
+          "decay": 2,
+          "sustain": 0.1,
+          "release": 2
+      },
+      "modulation" : {
+          "type" : "square"
+      },
+      "modulationEnvelope" : {
+          "attack": 0.002,
+          "decay": 0.2,
+          "sustain": 0,
+          "release": 0.2
       }
     }
-    return reSet_arr
+    this.synth.set(synthJSON);
+  
+    // set position and color
+    this.crc.pivot.set(this.pos.x, this.pos.y);  
+    this.crc.position.set(this.pos.x, this.pos.y);
+    this.color = randEle(color_arr)
+  
+    // create new circle and add to stage 
+    this.crc.beginFill(this.color, 1);
+    this.crc.drawCircle(this.pos.x, this.pos.y, 40);
+    this.crc.endFill();
+    app.stage.addChild(this.crc);
+  
+    this.synth.triggerAttackRelease("C2", "8n");
+  
+    // let circle grow
+    var sca_fl = 1.0;
+    const ani_obj = setInterval(() => {
+    
+      this.clcElp = Date.now() - clcStrt_time;
+     
+      // stop the animation when time limit is reached or drawing stops but not before time minimum
+      if ((this.clcElp >= maxElp_fl || !this.isDraw) && (minElp_fl < this.clcElp)) {
+        clearInterval(ani_obj);
+      }
+  
+      sca_fl += 0.05;
+      this.crc.scale.set(sca_fl);
+      this.crc.alpha = 1/ ((sca_fl - 1) * 5);
+    }, 16); // animation intervall
   }
 
-  // get passed share of intervall
-  passedInter(i) {
-    return this.pass[i] / this.inter[i]
+  repeatCircle() {
+    this.isDraw = false // abort growing of circle
+    app.stage.removeChild(this.crc);
+
+    // set position
+    this.crc.pivot.set(this.pos.x, this.pos.y);  
+    this.crc.position.set(this.pos.x, this.pos.y);
+  
+    // create new circle and add to stage
+    this.crc.beginFill(this.color, 1);
+    this.crc.drawCircle(this.pos.x, this.pos.y, 40);
+    this.crc.endFill();
+    app.stage.addChild(this.crc);
+
+    // get starting time of re-drawing
+    const reStrt_time = Date.now()
+    
+    // compute reptitions and create counter
+    const rep_int = Math.floor(maxElp_fl * 3 / this.clcElp)
+    var cnt_int = 0;
+    var sca_fl = 1.0;
+    const ani_obj = setInterval(() => {
+  
+      const reElp_time = Date.now() - reStrt_time;
+  
+      sca_fl += 0.025 + 0.025 * (1 - cnt_int / rep_int);
+      this.crc.scale.set(sca_fl);
+      this.crc.alpha = 1 / ((sca_fl - 1) * 5);
+  
+      // count repetitions
+      if (cnt_int * this.clcElp < reElp_time) {
+        sca_fl = 1.0;
+        cnt_int += 1;
+        // play sound at start of new repetition
+        const plyStrt_time = Tone.now()
+        this.synth.triggerAttack("C2", plyStrt_time, 0.5 + 0.5 * (1 - cnt_int / rep_int))
+        this.synth.triggerRelease(plyStrt_time + this.clcElp)
+      }
+  
+      // finish animation when repetition number is reached
+      if (cnt_int == rep_int) {
+        clearInterval(ani_obj);
+        this.crc.clear()
+      }
+      
+    }, 16); // animation intervall
   }
 }
