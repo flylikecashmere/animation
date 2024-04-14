@@ -35,6 +35,10 @@ window.addEventListener('mousedown', (event) => {
 
 });
 
+hammer.on("touchstart", function(event) {
+  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
+});
+
 window.addEventListener('mouseup', (event) => {
 
   aniCircle_arr[act_int].repeatCircle()
@@ -48,7 +52,21 @@ window.addEventListener('mouseup', (event) => {
   
 });
 
-// code aufräumen (was aus alten funktionen übernehmen?/archivieren) -> git machen
+window.addEventListener('touchend', (event) => {
+
+  aniCircle_arr[act_int].repeatCircle()
+  
+  // update counter of next circle
+  if (act_int + 1 < parCrc_int) {
+    act_int = act_int + 1
+  } else {
+    act_int = 0
+  }
+  
+});
+
+
+// fixes: git, iOS support, sound, code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
 // code verbessern: mehr wrappen, frage chatgpt
 // actual design (modulation des vortons, andere eigenschaften je nach position (bass in der mitte, reverb etc))
