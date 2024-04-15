@@ -31,8 +31,8 @@ let act_int = 0;
 
 window.addEventListener('mousedown', (event) => {
 
-  //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
-  aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
+  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
+  //aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
 });
 
 hammer.on("panstart", function(event) {
