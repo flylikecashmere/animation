@@ -38,6 +38,7 @@ window.addEventListener('mousedown', (event) => {
 hammer.on("panstart", function(event) {
   //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
   app.renderer.backgroundColor = 0xCCCCCC;
+  synth.context.resume();
   aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
 });
 
