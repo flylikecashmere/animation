@@ -35,14 +35,17 @@ window.addEventListener('mousedown', (event) => {
 
 });
 
-//hammer.on("panstart", function(event) {
-//  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
-//});
+hammer.on("panstart", function(event) {
+  //  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
+  app.renderer.backgroundColor = 0xCCCCCC;
+});
 
+/*
 hammer.on("tap", function(event) {
   //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
   app.renderer.backgroundColor = 0xCCCCCC;
 });
+*/
 
 window.addEventListener('mouseup', (event) => {
 
@@ -57,9 +60,10 @@ window.addEventListener('mouseup', (event) => {
   
 });
 
-/*
+
 hammer.on("panend", function(event) {
 
+  /*
   aniCircle_arr[act_int].repeatCircle()
   
   // update counter of next circle
@@ -68,9 +72,10 @@ hammer.on("panend", function(event) {
   } else {
     act_int = 0
   }
+  */
+  app.renderer.backgroundColor = 0xFF0000;
   
 });
-*/
 
 // fixes: git, iOS support, sound, code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
