@@ -31,13 +31,14 @@ let act_int = 0;
 
 window.addEventListener('mousedown', (event) => {
 
-  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
-
+  //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
+  aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
 });
 
 hammer.on("panstart", function(event) {
-  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
+  //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
   app.renderer.backgroundColor = 0xCCCCCC;
+  aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
 });
 
 /*
@@ -60,7 +61,7 @@ window.addEventListener('mouseup', (event) => {
   
 });
 
-
+/*
 hammer.on("panend", function(event) {
 
   aniCircle_arr[act_int].repeatCircle()
@@ -74,7 +75,7 @@ hammer.on("panend", function(event) {
   app.renderer.backgroundColor = 0xFF0000;
   
 });
-
+*/
 // fixes: git, iOS support, sound, code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
 // code verbessern: mehr wrappen, frage chatgpt
