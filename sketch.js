@@ -47,9 +47,7 @@ hammer.on("panstart", function(event) {
 
 
 hammer.on("tap", function(event) {
-  //console.log(event.center.x)
   aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
-  //app.renderer.backgroundColor = 0xCCCCCC;
 });
 
 
@@ -68,8 +66,8 @@ window.addEventListener('mouseup', (event) => {
 });
 */
 
-/*
-hammer.on("panend", function(event) {
+
+hammer.on("pressup", function(event) {
 
   aniCircle_arr[act_int].repeatCircle()
   
@@ -79,10 +77,10 @@ hammer.on("panend", function(event) {
   } else {
     act_int = 0
   }
-  //app.renderer.backgroundColor = 0xFF0000;
+
   
 });
-*/
+
 // fixes: iOS support (position kreis,, sound), code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
 // code verbessern: mehr wrappen, frage chatgpt
