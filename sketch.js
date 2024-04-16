@@ -36,7 +36,7 @@ window.addEventListener('mousedown', (event) => {
 });
 
 hammer.on("panstart", function(event) {
-  aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
+  aniCircle_arr[act_int].startCircle(event.gesture.center.pageX, event.gesture.center.pageY)
   //app.renderer.backgroundColor = 0xCCCCCC;
   //synth.context.resume();
   //aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
@@ -76,7 +76,7 @@ hammer.on("panend", function(event) {
   
 });
 
-// fixes: git, iOS support, sound, code aufräumen (was aus alten funktionen übernehmen?/archivieren)
+// fixes: iOS support (position kreis,, sound), code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
 // code verbessern: mehr wrappen, frage chatgpt
 // actual design (modulation des vortons, andere eigenschaften je nach position (bass in der mitte, reverb etc))
