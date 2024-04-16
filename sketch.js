@@ -29,11 +29,13 @@ for (let i = 0; i < aniCircle_arr.length; i++) {
 
 let act_int = 0;
 
+/*
 window.addEventListener('mousedown', (event) => {
 
   aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
   //aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
 });
+
 
 hammer.on("panstart", function(event) {
   aniCircle_arr[act_int].startCircle(event.gesture.center.pageX, event.gesture.center.pageY)
@@ -41,14 +43,17 @@ hammer.on("panstart", function(event) {
   //synth.context.resume();
   //aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
 });
-
-/*
-hammer.on("tap", function(event) {
-  //aniCircle_arr[act_int].startCircle(event.clientX, event.clientY)
-  app.renderer.backgroundColor = 0xCCCCCC;
-});
 */
 
+
+hammer.on("tap", function(event) {
+  //console.log(event.center.x)
+  aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
+  //app.renderer.backgroundColor = 0xCCCCCC;
+});
+
+
+/*
 window.addEventListener('mouseup', (event) => {
 
   aniCircle_arr[act_int].repeatCircle()
@@ -61,6 +66,7 @@ window.addEventListener('mouseup', (event) => {
   }
   
 });
+*/
 
 /*
 hammer.on("panend", function(event) {
