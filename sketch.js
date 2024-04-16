@@ -46,7 +46,8 @@ hammer.on("panstart", function(event) {
 */
 
 
-hammer.on("tap", function(event) {
+hammer.on("press", function(event) {
+  console.log("start")
   aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
 });
 
@@ -68,6 +69,8 @@ window.addEventListener('mouseup', (event) => {
 
 
 hammer.on("pressup", function(event) {
+
+  console.log("ende")
 
   aniCircle_arr[act_int].repeatCircle()
   
