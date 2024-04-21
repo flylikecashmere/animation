@@ -47,8 +47,9 @@ hammer.on("panstart", function(event) {
 
 
 hammer.on("press", function(event) {
-  console.log("start")
-  aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
+  //console.log("start")
+  //aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
+  app.renderer.backgroundColor = 0xCCCCCC;
 });
 
 
@@ -72,6 +73,7 @@ hammer.on("pressup", function(event) {
 
   console.log("ende")
 
+  /*
   aniCircle_arr[act_int].repeatCircle()
   
   // update counter of next circle
@@ -80,7 +82,8 @@ hammer.on("pressup", function(event) {
   } else {
     act_int = 0
   }
-
+  */
+  app.renderer.backgroundColor = 0xF6F6F6;
   
 });
 
