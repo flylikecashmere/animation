@@ -45,11 +45,11 @@ hammer.on("panstart", function(event) {
 });
 */
 
-hammertime.get('press').set({
+hammer.get('press').set({
   time: 250
 });
 
-hammertime.get('pressup').set({
+hammer.get('pressup').set({
   time: 250
 });
 
