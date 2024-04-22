@@ -46,13 +46,11 @@ hammer.on("panstart", function(event) {
 */
 
 hammertime.get('press').set({
-  time: 1,
-  threshold: 1
+  time: 1
 });
 
 hammertime.get('pressup').set({
-  time: 1,
-  threshold: 1
+  time: 1
 });
 
 hammer.on("press", function(event) {
