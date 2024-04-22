@@ -77,3 +77,19 @@ function resize() {
 }
 
 // #endregion
+
+// #region prevent default behaviour of touch events
+
+window.addEventListener('touchstart', function(event) {
+    e.preventDefault();
+});
+
+window.addEventListener('touchmove', function(evente) {
+    e.preventDefault();
+});
+
+window.addEventListener('touchend', function(event) {
+    e.preventDefault();
+});
+
+// #endregion

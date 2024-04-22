@@ -36,33 +36,6 @@ window.addEventListener('mousedown', (event) => {
   //aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
 });
 
-
-hammer.on("panstart", function(event) {
-  aniCircle_arr[act_int].startCircle(event.gesture.center.pageX, event.gesture.center.pageY)
-  app.renderer.backgroundColor = 0xCCCCCC;
-  //synth.context.resume();
-  //aniCircle_arr[act_int].synth.triggerAttackRelease("C2", "8n")
-});
-*/
-
-hammer.get('press').set({
-  time: 1
-});
-
-/*
-hammer.get('pressup').set({
-  time: 250
-});
-*/
-
-hammer.on("press", function(event) {
-  //console.log("start")
-  aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
-  //app.renderer.backgroundColor = 0xCCCCCC;
-});
-
-
-/*
 window.addEventListener('mouseup', (event) => {
 
   aniCircle_arr[act_int].repeatCircle()
@@ -75,7 +48,18 @@ window.addEventListener('mouseup', (event) => {
   }
   
 });
+
 */
+
+hammer.get('press').set({
+  time: 5
+});
+
+hammer.on("press", function(event) {
+  aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
+});
+
+
 
 
 hammer.on("pressup", function(event) {
