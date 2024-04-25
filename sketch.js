@@ -52,10 +52,14 @@ window.addEventListener('mouseup', (event) => {
 */
 
 hammer.get('press').set({
-  time: 5,
-  threshold: 1000
+  time: 1,
+  threshold: 10000
 });
 
+
+hammer.get('pan').set({
+  threshold: 2
+});
 
 
 hammer.on("press", function(event) {
@@ -80,7 +84,7 @@ hammer.on('panend', handleRelease);
 
 
 // fixes: iOS support (sound)
-// bessere qualität
+// bei kurzem klick kein loop, bessere qualität
 // code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
 // code verbessern: mehr wrappen, frage chatgpt
