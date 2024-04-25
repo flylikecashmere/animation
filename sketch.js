@@ -53,7 +53,7 @@ window.addEventListener('mouseup', (event) => {
 
 hammer.get('press').set({
   time: 5,
-  threshold: 10000
+  threshold: 1000
 });
 
 
@@ -79,7 +79,7 @@ hammer.on('pressup', handleRelease);
 hammer.on('panend', handleRelease);
 
 
-// fixes: iOS support (sensitivät, sound)
+// fixes: iOS support (sound)
 // bessere qualität
 // code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
