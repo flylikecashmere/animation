@@ -43,6 +43,7 @@ class aniCircle {
       }
     }
     this.synth.set(synthJSON);
+    this.synth.context.resume();
 
     // set position and color
     this.crc.pivot.set(this.pos.x, this.pos.y);  
