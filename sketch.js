@@ -53,19 +53,18 @@ window.addEventListener('mouseup', (event) => {
 
 hammer.get('press').set({
   time: 5,
-  threshold: 0
+  threshold: 10000
 });
+
+
 
 hammer.on("press", function(event) {
   aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
-  app.renderer.backgroundColor = 0xCCCCCC;
 });
 
 
-
-
-hammer.on("pressup", function(event) {
-  app.renderer.backgroundColor = 0xF6F6F6;
+// function to be triggered on release
+function handleRelease(event) {
   aniCircle_arr[act_int].repeatCircle()
   
   // update counter of next circle
@@ -74,10 +73,14 @@ hammer.on("pressup", function(event) {
   } else {
     act_int = 0
   }
-  
-});
+}
+
+hammer.on('pressup', handleRelease);
+hammer.on('panend', handleRelease);
+
 
 // fixes: iOS support (sensitivät, sound)
+// bessere qualität
 // code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
 // code verbessern: mehr wrappen, frage chatgpt
