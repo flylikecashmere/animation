@@ -53,7 +53,7 @@ window.addEventListener('mouseup', (event) => {
 
 hammer.get('press').set({
   time: 5,
-  threshold: 1000
+  threshold: 0
 });
 
 hammer.on("press", function(event) {
