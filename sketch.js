@@ -52,7 +52,8 @@ window.addEventListener('mouseup', (event) => {
 */
 
 hammer.get('press').set({
-  time: 5
+  time: 5,
+  threshold: 1000
 });
 
 hammer.on("press", function(event) {
@@ -76,7 +77,8 @@ hammer.on("pressup", function(event) {
   
 });
 
-// fixes: iOS support (position kreis,, sound), code aufräumen (was aus alten funktionen übernehmen?/archivieren)
+// fixes: iOS support (sensitivät, sound)
+// code aufräumen (was aus alten funktionen übernehmen?/archivieren)
 // was für dauer überlegen (mindestwiederholungen + zeitabhängigen teil?)
 // code verbessern: mehr wrappen, frage chatgpt
 // actual design (modulation des vortons, andere eigenschaften je nach position (bass in der mitte, reverb etc))
