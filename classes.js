@@ -20,7 +20,6 @@ class aniCircle {
     this.pos = {x: x_fl, y: y_fl}
 
     // adjust tone
-    /*
     var synthJSON = {
       "harmonicity":10 * this.pos.x / size.x,
       "modulationIndex": 10 * this.pos.y / size.y,
@@ -44,7 +43,6 @@ class aniCircle {
       }
     }
     this.synth.set(synthJSON);
-    */
 
     // set position and color
     this.crc.pivot.set(this.pos.x, this.pos.y);  
@@ -110,11 +108,9 @@ class aniCircle {
         sca_fl = 1.0;
         cnt_int += 1;
         // play sound at start of new repetition
-        /* 
         const plyStrt_time = Tone.now()
         this.synth.triggerAttack("C2", plyStrt_time, 0.5 + 0.5 * (1 - cnt_int / rep_int))
         this.synth.triggerRelease(plyStrt_time + this.clcElp)
-        */
       }
   
       // finish animation when repetition number is reached
