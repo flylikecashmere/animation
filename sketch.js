@@ -57,13 +57,14 @@ hammer.get('press').set({
 
 hammer.on("press", function(event) {
   aniCircle_arr[act_int].startCircle(event.center.x, event.center.y)
+  app.renderer.backgroundColor = 0xCCCCCC;
 });
 
 
 
 
 hammer.on("pressup", function(event) {
-
+  app.renderer.backgroundColor = 0xF6F6F6;
   aniCircle_arr[act_int].repeatCircle()
   
   // update counter of next circle
