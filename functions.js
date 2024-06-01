@@ -3,6 +3,25 @@ function randEle(vector) {
     return vector[Math.floor(Math.random()*vector.length)]
 }
 
+
+// transfer to logarithmic scale
+function transferLogScale(val_fl, base_fl) {
+    val_fl = Math.max(0, Math.min(1, val_fl));
+    return Math.log(val_fl * (base_fl - 1) + 1) / Math.log(base_fl);
+}
+
+// transfer to exponential scale
+function transferExpScale(val_fl, base_fl) {
+    val_fl = Math.max(0, Math.min(1, val_fl));
+    return (Math.pow(base_fl,val_fl) - Math.pow(base_fl,0.0)) / (Math.pow(base_fl,1.0) - Math.pow(base_fl,0.0));
+}
+
+// transfer to polynomial scale
+function transferPolyScale(val_fl, base_fl, offset_fl) {
+    return Math.abs(Math.pow(val_fl - offset_fl, base_fl)/Math.pow(1 - offset_fl, base_fl));
+}
+    
+
 // distribute range 'inter' into 'step' steps with given 'ratio' corrected by 'scale'
 function distVal(ratio,sca,step,inter,type) {
    
@@ -109,8 +128,6 @@ function outLimit(bounds_dic,check) { // array of graphic elements, string array
     }
     return check_boo
 }
-
-
 
 // convert hex string into array of rgb colors
 function hexToRgb(hex_str) {
@@ -223,7 +240,6 @@ function mirror(container,p1_arr,p2_arr) { // container, first point of line, se
     container.position = {x: projX_fl, y: projY_fl}
   
 }
-
 
 // group n numbers into x equal grups
 function groupNumbers(x, n) {
