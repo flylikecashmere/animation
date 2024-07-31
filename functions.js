@@ -3,7 +3,6 @@ function randEle(vector) {
     return vector[Math.floor(Math.random()*vector.length)]
 }
 
-
 // transfer to logarithmic scale
 function transferLogScale(val_fl, base_fl) {
     val_fl = Math.max(0, Math.min(1, val_fl));
@@ -20,7 +19,6 @@ function transferExpScale(val_fl, base_fl) {
 function transferPolyScale(val_fl, base_fl, offset_fl) {
     return Math.abs(Math.pow(val_fl - offset_fl, base_fl)/Math.pow(1 - offset_fl, base_fl));
 }
-    
 
 // distribute range 'inter' into 'step' steps with given 'ratio' corrected by 'scale'
 function distVal(ratio,sca,step,inter,type) {
@@ -55,6 +53,30 @@ function getCircleY(relX, rad) {
 // linear interpolation
 function linInter(x, y1, y2, x1 = 0, x2 = 1) {
     return y1 + ((x - x1) * (y2 - y1)) / (x2 - x1);
+}
+
+// get two relevant points from val_vec for interpolation (val_vec is array of array with 2 elements, first is x and second y for interpolation)
+function getRelVal(rad_fl, val_vec, end_fl) {
+
+    val_vec.push([end_fl, val_vec[0][1]])
+
+    for (let i = 0; i < val_vec.length - 1; i++) {
+        var cur_fl = val_vec[i][0];
+        var nxt_fl = val_vec[i + 1][0];
+        
+        if (rad_fl >= cur_fl && rad_fl <= nxt_fl) {
+            return [val_vec[i], val_vec[i + 1]];
+        }
+    }
+
+    return null
+
+}
+
+function radLinInter(rad_fl, val_vec) {
+    val_vec = getRelVal(rad_fl, val_vec, 360)
+
+    return linInter(rad_fl, val_vec[0][1], val_vec[1][1], val_vec[0][0], val_vec[1][0])
 }
 
 // checks if the specified time intervall in frames is over 
@@ -271,4 +293,17 @@ function revDic(dic) {
         }   
     }
     return revDic;
+}
+
+// get angle between 0 and 360
+function getAng(x_fl, y_fl) {
+
+    var projCam_vec = projToPlane([camPos_vec[0], camPos_vec[1], disExt_vec[1]])
+    var ang_fl = angleVec([projCam_vec[0] - x_fl, projCam_vec[1] - y_fl], [0, 1]) * 57.2958
+    
+    if (x_fl > camPos_vec[0]) {
+        return ang_fl
+    } else {
+        return 360 - ang_fl
+    }
 }

@@ -1,3 +1,5 @@
+// todo: move as much stuff as possible out of plotting disk function (e.g., normal vector, also position?)
+// todo: think about how to determine start point and angle
 
 checkFps = false;
 
@@ -8,12 +10,11 @@ fpsMeter = loadFps(checkFps)
 const tCons_arr = [0.2, 1.0] 
 // first: time of repetition is multiple
 // second: grid for starting blob
-// third: minimum time
 const tracker_obj = new interTracker(tCons_arr)
 
 // setup parameters - repetitions
-const maxElp_fl = 10 // maximum time for repetition
-const minElp_fl = 0.5 // minimum time for repetition
+const maxElp_fl = 2.0 // maximum time for start hold
+const minElp_fl = 0.5 // minimum time for start hold
 const maxRep_int = 32; // maximum number of repetition
 const minRep_int = 8; // minimum number of repetition
 const parCrc_int = 20 // number of circles that can be displayed at the same time
@@ -26,6 +27,17 @@ const size_fl =  window.innerWidth // size in x-direction
 const rat_fl = window.outerHeight/window.innerWidth; // factor for size in y-direction
 
 const size = {x: size_fl, y: size_fl*rat_fl}
+
+// camera position and angle
+const camPos_vec = [size.x * 0.5, size.y * (1 - Math.pow(1.618,-3))]
+const camAng_vec = [- Math.PI / 128, 0.0, 0.0]
+
+// maximum and minimum distance of object from viewer
+const disExt_vec = [100, 3000]
+
+// sinus and cosinus of projection agle
+const camSin_vec = [Math.sin(camAng_vec[0]), Math.sin(camAng_vec[1]), Math.sin(camAng_vec[2])]
+const camCos_vec = [Math.cos(camAng_vec[0]), Math.cos(camAng_vec[1]), Math.cos(camAng_vec[2])]
 
 app = startCanvas() 
 
@@ -98,10 +110,37 @@ function handleRelease(event) {
 hammer.on('pressup', handleRelease);
 hammer.on('panend', handleRelease);
 
+/*
+console.log(projToPlane([size.x / 2, size.y / 2, 50]))
+*/
+
 app.ticker.add(() => {
 });
 
 
+const graphics = new PIXI.Graphics();
+graphics.beginFill(0xFF0000);
+graphics.drawCircle(camPos_vec[0], camPos_vec[1], 50);
+graphics.endFill();
+//app.stage.addChild(graphics);
+
+
+
+// mache am anfang erst kurz von transparent zu dicker und dann wieder zu transparent 
+// -> analog zum attack vom sound!
+
+// bewegung über horizont hinaus für besseren effekt
+// andere bedeutung für klick dauer -> ja, solange geklickt ist beschleunigt punkt -> alles bewegt sich selbst strecke, aber andere speed
+
+
+// mache zweite dimension abstand von mitte, die farbe und ton kontrolliert
+// verhindere gleichzeitig zu viel in der mitte 
+// modelliere evtl. pfad, schlangenlinien und in lfo übersezten
+// innen kreis: akkorder, aussen kreis: obertöne -> winkel entscheided über ton
+// verblassen des streifs?
+
+
+// ! weiter sound (siehe unten)
 
 // wie audio connecten -> tone besser verstehen:
 // a) über effekte (z.B. filter)

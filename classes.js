@@ -32,10 +32,15 @@ class interTracker {
 
 }
 
+
 class aniCircle {
   constructor() {
-    this.pos = {x: 0, y: 0}
-    this.crc = [new PIXI.Graphics(), new PIXI.Graphics()]; // graphic object
+    this.pos = [0.0, 0.0, 0.0]
+    this.dir = [0.0, 0.0, 1.0]
+    this.ang = 0.0;
+    this.rad = 0.0;
+    this.maxStep = 0;
+    this.crc = [new PIXI.Graphics(), new PIXI.Graphics()]; // graphic objects
     this.startDraw = false; // is circle currently being drawn?
     this.repDraw = false; // should circle be repeated?
     this.clcElp = 0; // time per repetition of circle in s
@@ -70,58 +75,55 @@ class aniCircle {
     this.synth = new Tone.FMSynth(synthJSON).toDestination();
   }
   
-  growCircle(rad_fl, rel1_fl, rel2_fl, rel3_fl, sp_fl) {
+  growCircle(rad_fl, rel1_fl, rel2_fl, rel3_fl) {
 
-    rad_fl += sp_fl * (1 - transferLogScale(rel1_fl, 2.718)); // increase radius
-
-    var base_fl = Math.pow(2.718,5) // controls exponential increase and decrease
-    var swt_fl = Math.pow(2.718,-2) // share of increase
-
-    if (rel2_fl < swt_fl) {
-      var trans_fl = (Math.pow(base_fl, rel2_fl) - 1) / (Math.pow(base_fl, swt_fl) - 1)
-    } else {
-      var trans_fl = (Math.pow(base_fl, 1 - rel2_fl) - 1) / (Math.pow(base_fl, 1 - swt_fl) - 1)
+    // move disk
+    var curPos_vec = addVec(this.pos, scalarMulti(this.dir, - transferLogScale(rel1_fl, Math.pow(2.718, 2)) * this.maxStep))
+    if (rel2_fl < 0.5) {
+      var trans_fl = transferLogScale(rel2_fl / 2.718, Math.exp(2.718,4))
+    } else{
+      var trans_fl = transferExpScale((1 - rel2_fl) / 2.718, Math.exp(2.718,2))   
     }
-    
-    var color_str = interpolateHex(this.color[0], this.color[1], transferLogScale(trans_fl, Math.pow(2.718,2.0)))
+   
+    var color_str = interpolateHex(this.color[0], this.color[1], transferLogScale(rel2_fl, Math.pow(2.718,1.0)))
+
     // draw new outer circle 
     this.crc[0].clear();
-    this.crc[0].beginFill(color_str, trans_fl); // Color for the outer ring
-    this.crc[0].drawCircle(this.pos.x, this.pos.y, rad_fl);
-    this.crc[0].endFill();
-    
-    this.crc[1].clear();
-    if (rel3_fl > 0) { // asynchron movement towards main cycle in repetition
-      var subRad_fl = Math.sin(rel3_fl * 2 * Math.PI)
-      this.crc[1].beginFill(color_str,  1 / 2.718 * transferExpScale(1 / Math.pow(2.718, 8) * (1 - trans_fl) + (1 - 1 / Math.pow(2.718,8)) * (1 - 0.5 * (1 + subRad_fl)), Math.pow(2.718,4)) ) ; // Color for the outer ring
-      this.crc[1].drawCircle(this.pos.x, this.pos.y, transferLogScale(rel2_fl, Math.pow(2.718,1)) * rad_fl * ((1 - 1 / 2.718) + 1 / 2.718 * subRad_fl));
-      this.crc[1].endFill();
-    } else { // simple increase on creation
-      this.crc[1].beginFill(color_str, trans_fl); //
-      this.crc[1].drawCircle(this.pos.x, this.pos.y, rad_fl / 2.718);
-      this.crc[1].endFill();
-    }
+    plotDisk(this.crc[0], curPos_vec, rad_fl, this.dir, color_str, trans_fl)
+    plotDisk(this.crc[1], curPos_vec, rad_fl, this.dir, color_str, trans_fl)
 
-
-    return rad_fl
   }
 
   startCircle(x_fl, y_fl) {
+
+
     const clcStrt_time = Date.now() / 1000;
     this.startDraw = true;
     for (let i = 0; i < this.crc.length; i++) {
       this.crc[i].clear();
     }
-    this.pos = {x: x_fl, y: y_fl}
 
+    this.maxStep = (disExt_vec[1] - disExt_vec[0]) / this.dir[2]
+    
+    // direction is from camera position to click position and maximum to minimum distance
+    var projDir_arr = projToPlane([x_fl, y_fl, disExt_vec[1]])
+    this.dir = normalize([camPos_vec[0] - projDir_arr[0], camPos_vec[1] - projDir_arr[1], disExt_vec[1] - disExt_vec[0]])
+
+    // get start position, angle, and radius
+    var projCam_arr = projToPlane([camPos_vec[0], camPos_vec[1], disExt_vec[1]])
+    var projDir_arr = normalize([x_fl - projCam_arr[0], y_fl - projCam_arr[1], 0])
+   
+
+    this.ang = getAng(x_fl, y_fl)
+    
+    // get characteristics based on positiona ang angle
+    this.rad = radLinInter(this.ang, radAng_arr)
+    this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1]], scalarMulti(projDir_arr, this.rad / Math.PI))
+    
     // adjust tone
-
-
 
     // set position and color
     for (let i = 0; i < this.crc.length; i++) {
-      this.crc[i].pivot.set(this.pos.x, this.pos.y);
-      this.crc[i].position.set(this.pos.x, this.pos.y);
       app.stage.addChild(this.crc[i]);
     }
 
@@ -131,7 +133,6 @@ class aniCircle {
     this.note = note_arr[chordCnt_dic[cnt_int % chord_arr.length] % note_arr.length]
   
     // let circle grow
-    var rad_fl = 0.0;
     const ani1_obj = setInterval(() => {
       this.clcElp = (Date.now() / 1000 - clcStrt_time);
 
@@ -149,8 +150,8 @@ class aniCircle {
         }
         this.synth.triggerRelease()
         clearInterval(ani1_obj);
-      } else {
-        rad_fl = this.growCircle(rad_fl, this.clcElp / maxElp_fl, this.clcElp / maxElp_fl, -1, scale_fl)
+      } else  {
+        this.growCircle(this.rad, this.clcElp / maxElp_fl, this.clcElp / maxElp_fl, -1)
       }
     }, 16); // animation intervall
   }
@@ -175,7 +176,6 @@ class aniCircle {
 
     // create iteration variables
     var cnt_int = 0;
-    var rad_fl = 0.0;
     var pass_boo = false;
     var itr_time;
     var scaRad_fl;
@@ -199,16 +199,14 @@ class aniCircle {
           
           const ani2_obj = setInterval(() => {
 
-
             // grow circle
             itr_time = Date.now() / 1000 - loop_time
             scaRad_fl = (1 - transferExpScale(cnt_int / rep_int, Math.pow(2.718,2))) * scale_fl
 
             // change sound
-            this.synth.modulationIndex.value = 10.0 * this.getRelShare();
+            //this.synth.modulationIndex.value = 10.0 * this.getRelShare();
+            this.growCircle(this.rad, itr_time / maxElp_fl, itr_time / this.clcElp, this.getRelShare())
             
-            
-            rad_fl = this.growCircle(rad_fl, itr_time / maxElp_fl, itr_time / this.clcElp, this.getRelShare(), scaRad_fl)
 
             // play sound
             if (playSound_boo && itr_time / this.clcElp > 0.05 ) {
@@ -220,9 +218,9 @@ class aniCircle {
 
             // update counter if repetition has passed
             if (this.clcElp < itr_time) {
+              this.crc[1].clear();
               cnt_int += 1;
               loop_time = Date.now() / 1000;
-              rad_fl = 0.0;
               playSound_boo = true;
             }
 
