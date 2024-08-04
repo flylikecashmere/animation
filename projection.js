@@ -7,18 +7,14 @@ function projToPlane(point_vec) {
     var y_fl = point_vec[1] - camPos_vec[1]
     var z_fl = point_vec[2]
 
-    // projection parameters
-    if (z_fl < 0.0) {
-        return [0, 0, 0]
-    } else {
-        var par1_fl = (camCos_vec[1] * z_fl + camSin_vec[1] * (camSin_vec[2] * y_fl + camCos_vec[2] * x_fl)) 
-        var par2_fl = (camCos_vec[2] * y_fl + camSin_vec[2] * x_fl)
-        var dX_fl = camCos_vec[1] * (camSin_vec[2] * y_fl + camCos_vec[2] * x_fl) - camSin_vec[1] * z_fl
-        var dY_fl = camSin_vec[0] * par1_fl + camCos_vec[0] * par2_fl
-        var dZ_fl = camCos_vec[0] * par1_fl + camSin_vec[0] * par2_fl
-    
-        return [size.x * dX_fl / dZ_fl * size.y / size.x + camPos_vec[0], size.y * dY_fl / dZ_fl + camPos_vec[1]]
-    }
+    // projection parameters  
+    var par1_fl = (camCos_vec[1] * z_fl + camSin_vec[1] * (camSin_vec[2] * y_fl + camCos_vec[2] * x_fl)) 
+    var par2_fl = (camCos_vec[2] * y_fl + camSin_vec[2] * x_fl)
+    var dX_fl = camCos_vec[1] * (camSin_vec[2] * y_fl + camCos_vec[2] * x_fl) - camSin_vec[1] * z_fl
+    var dY_fl = camSin_vec[0] * par1_fl + camCos_vec[0] * par2_fl
+    var dZ_fl = camCos_vec[0] * par1_fl + camSin_vec[0] * par2_fl
+
+    return [size.x * dX_fl / dZ_fl * size.y / size.x + camPos_vec[0], size.y * dY_fl / dZ_fl + camPos_vec[1]]
 }
 
 // get the cross product of two vectors with 3 elements (!)
@@ -31,7 +27,6 @@ function crossProduct(a_vec, b_vec) {
     
     return out_vec
 }
-
 
 // normalize a vector with 3 elements (!)
 function normalize(v_vec) {
@@ -136,4 +131,73 @@ function angleVec(a_vec, b_vec) {
     var cos_fl = dotProduct(a_vec, b_vec) / (magVec(a_vec) * magVec(b_vec));
     var clamCos_fl = Math.max(-1, Math.min(1, cos_fl)); // deals with small differences
     return Math.acos(clamCos_fl);
+}
+
+// get maximum steps until element leaves screen
+function getMaxStep(pos_vec, dir_vec) {
+
+
+    // estimate starting value for distance
+    if (dir_vec[0] < 0) {
+        var maxStep_x = pos_vec[0] / Math.abs(dir_vec[0])
+    } else {
+        var maxStep_x = (size.x - pos_vec[0]) / Math.abs(dir_vec[0])
+    }
+
+    // maximum step in y direction
+    if (dir_vec[1] < 0) {
+        var maxStep_y = pos_vec[1] / Math.abs(dir_vec[1])
+    } else {
+        var maxStep_y = (size.y - pos_vec[1]) / Math.abs(dir_vec[1])
+    }
+
+    // search meth to get maximum number of steps
+    var i = Math.min(maxStep_x, maxStep_y)
+    var saveI_dic = {inside: [], outside: []}
+    var relPos_vec
+    var vio_dic = {x: dia_fl, y: dia_fl}
+    var z = 1
+
+    while ((vio_dic.x > 0.001 * dia_fl && vio_dic.y > 0.001 * dia_fl) || z < 100) { 
+        relPos_vec = projToPlane(addVec(pos_vec, scalarMulti(dir_vec, - i)))
+
+        var vio_dic = {x: Infinity, y: Infinity}
+        // compute violatio of current point    
+        if (relPos_vec[0] < 0.5 * size.x) {
+            vio_dic.x = Math.abs(relPos_vec[0])
+        } else {
+            vio_dic.x = Math.abs(relPos_vec[0] - size.x)
+        }
+
+        if (relPos_vec[1] < 0.5 * size.y) {
+            vio_dic.y = Math.abs(relPos_vec[1])
+        } else {
+            vio_dic.y = Math.abs(relPos_vec[1] - size.y)
+        }
+
+        // adjust scaling i based on position of projected point
+        if (relPos_vec[0] < 0 || relPos_vec[0] > size.x || relPos_vec[1] < 0 || relPos_vec[1] > size.y) { // point is outside
+
+            saveI_dic.outside.push(i)
+
+            if (saveI_dic.inside.some(x => x >= i / 2)) {
+                i = (i + Math.max(...saveI_dic.inside)) / 2
+            } else {
+                i = i / 2
+            }
+
+        } else { // point is inside
+
+            saveI_dic.inside.push(i)
+
+            if (saveI_dic.outside.some(x => x <= i * 2)) {
+                i = (i + Math.min(...saveI_dic.outside)) / 2
+            } else {
+                i = i * 2
+            }
+        }
+        z = z + 1
+    }
+   
+    return i
 }

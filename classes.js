@@ -79,56 +79,70 @@ class aniCircle {
 
     // move disk
     var curPos_vec = addVec(this.pos, scalarMulti(this.dir, - transferLogScale(rel1_fl, Math.pow(2.718, 2)) * this.maxStep))
-    if (rel2_fl < 0.5) {
-      var trans_fl = transferLogScale(rel2_fl / 2.718, Math.exp(2.718,4))
-    } else{
-      var trans_fl = transferExpScale((1 - rel2_fl) / 2.718, Math.exp(2.718,2))   
-    }
-   
+    //console.log(transferLogScale(rel1_fl, Math.pow(2.718, 2)))
+    //console.log(curPos_vec)
+
+    // control color and transparency
+    var trans_fl = trans_arr[0] + trans_arr[1] * transferLogScale(rel2_fl, 2.718)
     var color_str = interpolateHex(this.color[0], this.color[1], transferLogScale(rel2_fl, Math.pow(2.718,1.0)))
 
-    // draw new outer circle 
-    this.crc[0].clear();
-    plotDisk(this.crc[0], curPos_vec, rad_fl, this.dir, color_str, trans_fl)
-    plotDisk(this.crc[1], curPos_vec, rad_fl, this.dir, color_str, trans_fl)
+    // draw new circle 
+    if (curPos_vec[2] > disExt_vec[0]) {
+      this.crc[0].clear();
+      //plotDisk(this.crc[0], curPos_vec, rad_fl * rel2_fl, this.dir, color_str, trans_fl)
+      plotDisk(this.crc[1], curPos_vec, rad_fl * transferLogScale(rel1_fl, 2.718), this.dir, color_str, trans_fl)
+    }
+
 
   }
 
   startCircle(x_fl, y_fl) {
 
-
+    // initialize variables
     const clcStrt_time = Date.now() / 1000;
     this.startDraw = true;
     for (let i = 0; i < this.crc.length; i++) {
       this.crc[i].clear();
     }
 
-    this.maxStep = (disExt_vec[1] - disExt_vec[0]) / this.dir[2]
-    
-    // direction is from camera position to click position and maximum to minimum distance
-    var projDir_arr = projToPlane([x_fl, y_fl, disExt_vec[1]])
-    this.dir = normalize([camPos_vec[0] - projDir_arr[0], camPos_vec[1] - projDir_arr[1], disExt_vec[1] - disExt_vec[0]])
-
-    // get start position, angle, and radius
+    // project starting position
     var projCam_arr = projToPlane([camPos_vec[0], camPos_vec[1], disExt_vec[1]])
     var projDir_arr = normalize([x_fl - projCam_arr[0], y_fl - projCam_arr[1], 0])
-   
 
+    // get direction and maximum steps to cross exit field of view
+    this.dir = normalize([camPos_vec[0] - x_fl, camPos_vec[1] - y_fl, disExt_vec[1] - disExt_vec[0]])
+  
+    // get angle and relative distance from center
     this.ang = getAng(x_fl, y_fl)
     
-    // get characteristics based on positiona ang angle
-    this.rad = radLinInter(this.ang, radAng_arr)
-    this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1]], scalarMulti(projDir_arr, this.rad / Math.PI))
+    this.dis = magVec([x_fl - camPos_vec[0], y_fl - camPos_vec[1]]) / dia_fl
+    this.rad = dia_fl * (rad_arr[0] + this.dis * rad_arr[1])
+    
+    // move starting position
+    if (this.dis < thrs_arr[1]) {
+      this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1]], scalarMulti(projDir_arr, thrs_arr[0] * 0.5 * dia_fl))
+      this.colorId = 1
+      var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[0])
+    } else {
+      this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1]], scalarMulti(projDir_arr, thrs_arr[2] * 0.5 * dia_fl))
+      this.rad = radRatio_fl * this.rad
+      this.colorId = 0
+      var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[1])
+    }
+
+    this.maxStep = getMaxStep(this.pos, this.dir)
     
     // adjust tone
 
-    // set position and color
+    // add circles
     for (let i = 0; i < this.crc.length; i++) {
       app.stage.addChild(this.crc[i]);
     }
 
-    this.colorId = cnt_int % color_arr.length
+    // set color scheme
     this.color = color_arr[this.colorId]
+    
+    // set note
     var note_arr = chord_arr[cnt_int % chord_arr.length]
     this.note = note_arr[chordCnt_dic[cnt_int % chord_arr.length] % note_arr.length]
   
@@ -148,12 +162,25 @@ class aniCircle {
         for (let i = 0; i < this.crc.length; i++) {
           this.crc[i].clear();
         }
+        // set time for repetition based on current speed
+        if (this.dis < thrs_arr[1]) {
+          this.clcElp = (frmRate_int / 1000) / (transferExpScale((this.clcElp + frmRate_int / 1000) / maxElp_fl, speedSca_fl) - transferExpScale(this.clcElp / maxElp_fl, speedSca_fl))
+        } else {
+          this.clcElp = (frmRate_int / 1000) / (transferLogScale((this.clcElp + frmRate_int / 1000) / maxElp_fl, speedSca_fl) - transferLogScale(this.clcElp / maxElp_fl, speedSca_fl))
+        }
         this.synth.triggerRelease()
         clearInterval(ani1_obj);
-      } else  {
-        this.growCircle(this.rad, this.clcElp / maxElp_fl, this.clcElp / maxElp_fl, -1)
+
+      } else {
+        if (this.dis < thrs_arr[1]) {
+          this.growCircle(this.rad, transferExpScale(this.clcElp / maxElp_fl, speedSca_fl), this.clcElp / maxElp_fl, -1)
+        } else {
+          this.growCircle(this.rad, transferLogScale(this.clcElp / maxElp_fl, speedSca_fl), this.clcElp / maxElp_fl, -1)
+        }
       }
-    }, 16); // animation intervall
+      
+
+    }, frmRate_int); // animation intervall
   }
 
   getRelShare() {
@@ -169,7 +196,6 @@ class aniCircle {
   repeatCircle(track_obj) {
 
     this.startDraw = false;
-   
 
     // define characteristics of repetition
     const rep_int = Math.floor(minRep_int + transferExpScale((this.clcElp - minElp_fl) /  maxElp_fl, Math.pow(2.718,-4)) * maxRep_int)
@@ -178,16 +204,14 @@ class aniCircle {
     var cnt_int = 0;
     var pass_boo = false;
     var itr_time;
-    var scaRad_fl;
 
     // adjust synth
     this.synth.envelope.decay = this.clcElp;
-    
     if (this.repDraw) {
       // wait for start of animation
       const waitForStart_obj = setInterval(() => {
         
-        pass_boo = track_obj.updateTracker(Date.now() / 1000,[1])[1]
+        pass_boo = track_obj.updateTracker(Date.now() / 1000, [1])[1]
         
         if (pass_boo) {
           clearInterval(waitForStart_obj); // Stop checking
@@ -201,13 +225,11 @@ class aniCircle {
 
             // grow circle
             itr_time = Date.now() / 1000 - loop_time
-            scaRad_fl = (1 - transferExpScale(cnt_int / rep_int, Math.pow(2.718,2))) * scale_fl
 
             // change sound
             //this.synth.modulationIndex.value = 10.0 * this.getRelShare();
-            this.growCircle(this.rad, itr_time / maxElp_fl, itr_time / this.clcElp, this.getRelShare())
+            this.growCircle(this.rad, itr_time / this.clcElp, itr_time / maxElp_fl, this.getRelShare())
             
-
             // play sound
             if (playSound_boo && itr_time / this.clcElp > 0.05 ) {
               var velo_fl = 1 - cnt_int / rep_int
@@ -231,16 +253,15 @@ class aniCircle {
               }
               clearInterval(ani2_obj);
             }
-          }, 16); // animation intervall
+          }, frmRate_int); // animation intervall
         }      
-      }, 16); // animation intervall
+      }, frmRate_int); // animation intervall
     }
   } 
 }
 
 function checkDist(lastPos_dic, curPos_dic) {
   dist_fl = Math.pow(Math.pow(lastPos_dic.x - curPos_dic.x, 2) + Math.pow(lastPos_dic.y - curPos_dic.y, 2), 0.5)
-  dia_fl = Math.pow(Math.pow(size.x, 2) + Math.pow(size.y, 2), 0.5)
   if (dist_fl > dia_fl / 2.718 / 2.718) {
     cnt_int = cnt_int + 1
   }

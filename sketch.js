@@ -1,5 +1,3 @@
-// todo: move as much stuff as possible out of plotting disk function (e.g., normal vector, also position?)
-// todo: think about how to determine start point and angle
 
 checkFps = false;
 
@@ -12,28 +10,36 @@ const tCons_arr = [0.2, 1.0]
 // second: grid for starting blob
 const tracker_obj = new interTracker(tCons_arr)
 
-// setup parameters - repetitions
-const maxElp_fl = 2.0 // maximum time for start hold
+// setup parameters - single disks
+const maxElp_fl = 5.0 // maximum time for start hold
 const minElp_fl = 0.5 // minimum time for start hold
-const maxRep_int = 32; // maximum number of repetition
+const maxRep_int = 46; // maximum number of repetition
 const minRep_int = 8; // minimum number of repetition
 const parCrc_int = 20 // number of circles that can be displayed at the same time
 
-// setup parameters - blob
-const scale_fl = 8.0
+const rad_arr = [0.04, 0.02 * 1.618] // minimum radius and distance dependant radius relative to diagonal 
+const trans_arr  = [0.02, 0.02] // minimum transparency and distance dependant component
+
+// setup parameters - inner and outer section
+const thrs_arr = [0.15, 0.1 * Math.pow(1.618,2), 0.1 * Math.pow(1.618,3)] // relative radius for inner spawning, threshold for outer spawning, radius for outer spawing
+const relSpeed_arr = [1.0, 2.0] // relative speed indicator for inner and outer section
+const radRatio_fl = 1 / 1.618 // ratio of outer-to-inner radius
+
 
 // canvas setup
 const size_fl =  window.innerWidth // size in x-direction
 const rat_fl = window.outerHeight/window.innerWidth; // factor for size in y-direction
 
 const size = {x: size_fl, y: size_fl*rat_fl}
+const dia_fl = Math.sqrt(size.x * size.x + size.y * size.y)
 
 // camera position and angle
-const camPos_vec = [size.x * 0.5, size.y * (1 - Math.pow(1.618,-3))]
+const camPos_vec = [size.x * 0.5, size.y * (1 - Math.pow(1.618,-6))]
 const camAng_vec = [- Math.PI / 128, 0.0, 0.0]
 
 // maximum and minimum distance of object from viewer
-const disExt_vec = [100, 3000]
+const disExt_vec = [300, 3000]
+const frmRate_int = 32;
 
 // sinus and cosinus of projection agle
 const camSin_vec = [Math.sin(camAng_vec[0]), Math.sin(camAng_vec[1]), Math.sin(camAng_vec[2])]
@@ -110,10 +116,6 @@ function handleRelease(event) {
 hammer.on('pressup', handleRelease);
 hammer.on('panend', handleRelease);
 
-/*
-console.log(projToPlane([size.x / 2, size.y / 2, 50]))
-*/
-
 app.ticker.add(() => {
 });
 
@@ -125,36 +127,23 @@ graphics.endFill();
 //app.stage.addChild(graphics);
 
 
+// wohin anwendung abgestürzt?
+// kontrollieren verschwinden: innere sehr dominant jetzt wo alles über horizont geht 
+// -> hier wieder nur bis kreis bewegen + irgendwie auf betrachter zu
+// code schatten! (projektion scheiben aus anderem winkel auf andere fläche -> 2d koordinaten dann wiederum 3d auf sichtebene)
+// control speed better <-> starker unterschied erster und zweiter klick
 
-// mache am anfang erst kurz von transparent zu dicker und dann wieder zu transparent 
-// -> analog zum attack vom sound!
+// kreise sind untereinander verknüpft (immer innen mit aussen, weil ja unterschiedliches tempo)
 
-// bewegung über horizont hinaus für besseren effekt
-// andere bedeutung für klick dauer -> ja, solange geklickt ist beschleunigt punkt -> alles bewegt sich selbst strecke, aber andere speed
-
-
-// mache zweite dimension abstand von mitte, die farbe und ton kontrolliert
-// verhindere gleichzeitig zu viel in der mitte 
-// modelliere evtl. pfad, schlangenlinien und in lfo übersezten
-// innen kreis: akkorder, aussen kreis: obertöne -> winkel entscheided über ton
-// verblassen des streifs?
-
-
-// ! weiter sound (siehe unten)
-
-// wie audio connecten -> tone besser verstehen:
-// a) über effekte (z.B. filter)
-
+// sound:
+// attack und aufteilung verblassung
 // verknüfung so richtig? was mit nicht mehr hörbaren kreisen -> müssten resettet werden
-
 // sound rund machen -> connection in audio übersetzen -> connection raum gerade gut?
 // weitere verknüpfung mit optik (gross = tiefer)
-// timings, farben etc. rund machen
-// -> wenn alle akkorde spielen sample abspielen
-
-// zukunftsmusik
-// mache scripts, die automatisch bestimmtes pattern erzeugen und teile die patterns
-// teste alternativen: innerer blob, synchron aber wächst immer schneller
-// blobs: schneller wachsen und warme farben im zentrum -> was für achsen überlegen
-// sound: angenehmer sound, frequenzmodulation durch vorton, tief im zentrum -> nutze x/y für tonhöhe?
+// modelliere evtl. pfad, schlangenlinien und in lfo übersezten
 // freischalten: hintergrund loop?, "this is our connection" sample
+// räumliche effekte
+
+// pattern: timing kontrollieren (mindestabstand chords untereinander, obertöne offbeat)
+
+// bonus: leichte variation der farben je nach ton, add randomnes, verblassen
