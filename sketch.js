@@ -21,7 +21,7 @@ const rad_arr = [0.04, 0.02 * 1.618] // minimum radius and distance dependant ra
 const trans_arr  = [0.02, 0.02] // minimum transparency and distance dependant component
 
 // setup parameters - inner and outer section
-const thrs_arr = [0.15, 0.1 * Math.pow(1.618,2), 0.1 * Math.pow(1.618,3)] // relative radius for inner spawning, threshold for outer spawning, radius for outer spawing
+const thrs_arr = [0.15, 0.15 * Math.pow(1.618,1), 0.15 * Math.pow(1.618,3)] // start radius for inner spawning, threshold for outer spawning, start radius for outer spawing
 const relSpeed_arr = [1.0, 2.0] // relative speed indicator for inner and outer section
 const radRatio_fl = 1 / 1.618 // ratio of outer-to-inner radius
 
@@ -44,6 +44,7 @@ const frmRate_int = 32;
 // sinus and cosinus of projection agle
 const camSin_vec = [Math.sin(camAng_vec[0]), Math.sin(camAng_vec[1]), Math.sin(camAng_vec[2])]
 const camCos_vec = [Math.cos(camAng_vec[0]), Math.cos(camAng_vec[1]), Math.cos(camAng_vec[2])]
+
 
 app = startCanvas() 
 
@@ -127,13 +128,13 @@ graphics.endFill();
 //app.stage.addChild(graphics);
 
 
-// wohin anwendung abgestürzt?
-// kontrollieren verschwinden: innere sehr dominant jetzt wo alles über horizont geht 
-// -> hier wieder nur bis kreis bewegen + irgendwie auf betrachter zu
-// code schatten! (projektion scheiben aus anderem winkel auf andere fläche -> 2d koordinaten dann wiederum 3d auf sichtebene)
-// control speed better <-> starker unterschied erster und zweiter klick
 
-// kreise sind untereinander verknüpft (immer innen mit aussen, weil ja unterschiedliches tempo)
+// 3) schatten
+// 2) steuere framerate variabel
+// 4) überlege verknüpfung der kreise für späteren sound effekt
+// 5) mache arrangement rund (grösse, tempo etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit
+
+
 
 // sound:
 // attack und aufteilung verblassung

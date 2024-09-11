@@ -1,13 +1,13 @@
 
 // project 3d object to camera plane
 function projToPlane(point_vec) {
-    
+
     // relative points
     var x_fl = point_vec[0] - camPos_vec[0]
     var y_fl = point_vec[1] - camPos_vec[1]
     var z_fl = point_vec[2]
 
-    // projection parameters  
+    // projection parameters
     var par1_fl = (camCos_vec[1] * z_fl + camSin_vec[1] * (camSin_vec[2] * y_fl + camCos_vec[2] * x_fl)) 
     var par2_fl = (camCos_vec[2] * y_fl + camSin_vec[2] * x_fl)
     var dX_fl = camCos_vec[1] * (camSin_vec[2] * y_fl + camCos_vec[2] * x_fl) - camSin_vec[1] * z_fl
@@ -109,13 +109,6 @@ function plotDisk(disk_obj, center_vec, rad_fl, norm1_vec, color_str, trans_fl) 
 
 }
 
-// gives the 3d point for the 2d point and depth put into the function
-function planeToProj(point_vec, depth_fl) {
-    
-    var z_fl = depth_fl - camPos_vec[2]
-
-}
-
 // get the dot product of two vectors with 2 elements (!)
 function dotProduct(a_vec, b_vec) {
     return a_vec[0] * b_vec[0] + a_vec[1] * b_vec[1]
@@ -133,8 +126,64 @@ function angleVec(a_vec, b_vec) {
     return Math.acos(clamCos_fl);
 }
 
+
+// get maximum steps until element has relative difference from mid point
+function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
+
+    var i = 5
+    var dist_fl = 1000
+    var maxI_fl = (pos_vec[2] - disExt_vec[0]) / dir_vec[2]
+
+    var relStart_vec = projToPlane(pos_vec)
+    var maxDist_fl = magVec([relStart_vec[0] - end_vec[0], relStart_vec[1] - end_vec[1]])
+    var saveI_dic = {inside: [], outside: []}
+
+    var z = 1
+    while (Math.abs(dist_fl - maxDist_fl) > 0.005 && z < 20) { //  && i < maxI_fl
+
+        spacePos_vec = addVec(pos_vec, scalarMulti(dir_vec, - i))
+        relPos_vec = projToPlane(spacePos_vec)
+
+        //console.log([relPos_vec[0] - mid_vec[0], relPos_vec[1] - mid_vec[1]])
+        dist_fl = magVec([relPos_vec[0] - end_vec[0], relPos_vec[1] - end_vec[1]])
+
+        z = z + 1
+        console.log("next")
+        console.log(i)
+        console.log(relPos_vec)
+        console.log(dist_fl)
+        console.log(maxDist_fl)
+        
+        if (dist_fl > maxDist_fl) { // point is outside
+        
+            saveI_dic.outside.push(i)            
+            if (saveI_dic.inside.some(x => x >= i / 2)) {
+                i = (i + Math.max(...saveI_dic.inside)) / 2
+            } else {
+                i = i / 2
+            }
+
+        } else { // point is inside
+            
+            saveI_dic.inside.push(i)
+            if (saveI_dic.outside.some(x => x <= i * 2)) {
+                i = (i + Math.min(...saveI_dic.outside)) / 2
+            } else {
+                i = i * 2
+            }
+        }
+
+        if (i > maxI_fl) {
+        //    i = maxI_fl
+        }
+    }
+
+    return i
+
+}
+
 // get maximum steps until element leaves screen
-function getMaxStep(pos_vec, dir_vec) {
+function getMaxStepScreen(pos_vec, dir_vec) {
 
 
     // estimate starting value for distance
@@ -151,18 +200,21 @@ function getMaxStep(pos_vec, dir_vec) {
         var maxStep_y = (size.y - pos_vec[1]) / Math.abs(dir_vec[1])
     }
 
-    // search meth to get maximum number of steps
+    // search method to get maximum number of steps
     var i = Math.min(maxStep_x, maxStep_y)
     var saveI_dic = {inside: [], outside: []}
+    var vio_dic = {x: Infinity, y: Infinity, z: Infinity}
     var relPos_vec
-    var vio_dic = {x: dia_fl, y: dia_fl}
     var z = 1
 
-    while ((vio_dic.x > 0.001 * dia_fl && vio_dic.y > 0.001 * dia_fl) || z < 100) { 
-        relPos_vec = projToPlane(addVec(pos_vec, scalarMulti(dir_vec, - i)))
+    // adjust steps until position is almost the edge of the visible area
+    while (!(vio_dic.x < 0.001 * dia_fl || vio_dic.y < 0.001 * dia_fl || vio_dic.z < 0.001 * (disExt_vec[1] - disExt_vec[0]))) { 
 
-        var vio_dic = {x: Infinity, y: Infinity}
-        // compute violatio of current point    
+        z = z + 1
+        spacePos_vec = addVec(pos_vec, scalarMulti(dir_vec, - i))
+        relPos_vec = projToPlane(spacePos_vec)
+
+        // compute violation of current point (as in how far its away from border, both directions!)
         if (relPos_vec[0] < 0.5 * size.x) {
             vio_dic.x = Math.abs(relPos_vec[0])
         } else {
@@ -175,11 +227,16 @@ function getMaxStep(pos_vec, dir_vec) {
             vio_dic.y = Math.abs(relPos_vec[1] - size.y)
         }
 
+        if (spacePos_vec[2] < 0.5 * (disExt_vec[0] + disExt_vec[1])) {
+            vio_dic.z = Math.abs(spacePos_vec[2] - disExt_vec[0])
+        } else {
+            vio_dic.z = Math.abs(spacePos_vec[2] - disExt_vec[1])
+        }
+
         // adjust scaling i based on position of projected point
-        if (relPos_vec[0] < 0 || relPos_vec[0] > size.x || relPos_vec[1] < 0 || relPos_vec[1] > size.y) { // point is outside
+        if (relPos_vec[0] < 0 || relPos_vec[0] > size.x || relPos_vec[1] < 0 || relPos_vec[1] > size.y || spacePos_vec[2] < disExt_vec[0] || spacePos_vec[2] > disExt_vec[1]) { // point is outside
 
-            saveI_dic.outside.push(i)
-
+            saveI_dic.outside.push(i)            
             if (saveI_dic.inside.some(x => x >= i / 2)) {
                 i = (i + Math.max(...saveI_dic.inside)) / 2
             } else {
@@ -196,8 +253,48 @@ function getMaxStep(pos_vec, dir_vec) {
                 i = i * 2
             }
         }
-        z = z + 1
     }
    
     return i
+}
+
+// rotate a vector around axis
+function rotateVec(in_vec, rad_fl, ax_str) {
+
+    let rot_mat;
+
+    switch (ax_str) {
+        case 'x':
+            rot_mat = [
+                [1, 0, 0],
+                [0, Math.cos(rad_fl), -Math.sin(rad_fl)],
+                [0, Math.sin(rad_fl), Math.cos(rad_fl)]
+            ];
+            break;
+        case 'y':
+            rot_mat = [
+                [Math.cos(rad_fl), 0, Math.sin(rad_fl)],
+                [0, 1, 0],
+                [-Math.sin(rad_fl), 0, Math.cos(rad_fl)]
+            ];
+            break;
+        case 'z':
+            rot_mat = [
+                [Math.cos(rad_fl), -Math.sin(rad_fl), 0],
+                [Math.sin(rad_fl), Math.cos(rad_fl), 0],
+                [0, 0, 1]
+            ];
+            break;
+    }
+
+    return multiMatVec(rot_mat, in_vec);
+}
+
+// multipy 3-dim vector with matrix
+function multiMatVec(in_mat, in_vec) {
+    return [
+        in_mat[0][0] * in_vec[0] + in_mat[0][1] * in_vec[1] + in_mat[0][2] * in_vec[2],
+        in_mat[1][0] * in_vec[0] + in_mat[1][1] * in_vec[1] + in_mat[1][2] * in_vec[2],
+        in_mat[2][0] * in_vec[0] + in_mat[2][1] * in_vec[1] + in_mat[2][2] * in_vec[2]
+    ];
 }

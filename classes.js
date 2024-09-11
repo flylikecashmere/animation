@@ -119,18 +119,20 @@ class aniCircle {
     this.rad = dia_fl * (rad_arr[0] + this.dis * rad_arr[1])
     
     // move starting position
-    if (this.dis < thrs_arr[1]) {
-      this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1]], scalarMulti(projDir_arr, thrs_arr[0] * 0.5 * dia_fl))
+    if (this.dis < thrs_arr[1]) { // inner circles
+      this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1] * 0.9], scalarMulti(projDir_arr, thrs_arr[0] * 0.5 * dia_fl))
       this.colorId = 1
       var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[0])
-    } else {
-      this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1]], scalarMulti(projDir_arr, thrs_arr[2] * 0.5 * dia_fl))
+      this.dir = rotateVec(this.dir, -1 * camAng_vec[0], "z")
+      this.maxStep = getMaxStepCircle(this.pos, this.dir, addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1] * 0.9], scalarMulti(projDir_arr, thrs_arr[2] * 0.5 * dia_fl)))
+    } else { // outer circles
+      this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1] * 0.9], scalarMulti(projDir_arr, thrs_arr[2] * 0.5 * dia_fl))
       this.rad = radRatio_fl * this.rad
       this.colorId = 0
       var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[1])
+      this.maxStep = getMaxStepScreen(this.pos, this.dir)
     }
 
-    this.maxStep = getMaxStep(this.pos, this.dir)
     
     // adjust tone
 
