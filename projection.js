@@ -1,20 +1,20 @@
 
 // project 3d object to camera plane
-function projToPlane(point_vec) {
+function projToPlane(point_vec, obj_proj) {
 
     // relative points
-    var x_fl = point_vec[0] - camPos_vec[0]
-    var y_fl = point_vec[1] - camPos_vec[1]
+    var x_fl = point_vec[0] - obj_proj.pos[0]
+    var y_fl = point_vec[1] - obj_proj.pos[1]
     var z_fl = point_vec[2]
 
     // projection parameters
-    var par1_fl = (camCos_vec[1] * z_fl + camSin_vec[1] * (camSin_vec[2] * y_fl + camCos_vec[2] * x_fl)) 
-    var par2_fl = (camCos_vec[2] * y_fl + camSin_vec[2] * x_fl)
-    var dX_fl = camCos_vec[1] * (camSin_vec[2] * y_fl + camCos_vec[2] * x_fl) - camSin_vec[1] * z_fl
-    var dY_fl = camSin_vec[0] * par1_fl + camCos_vec[0] * par2_fl
-    var dZ_fl = camCos_vec[0] * par1_fl + camSin_vec[0] * par2_fl
+    var par1_fl = (obj_proj.cos[1] * z_fl + obj_proj.sin[1] * (obj_proj.sin[2] * y_fl + obj_proj.cos[2] * x_fl)) 
+    var par2_fl = (obj_proj.cos[2] * y_fl + obj_proj.sin[2] * x_fl)
+    var dX_fl = obj_proj.cos[1] * (obj_proj.sin[2] * y_fl + obj_proj.cos[2] * x_fl) - obj_proj.sin[1] * z_fl
+    var dY_fl = obj_proj.sin[0] * par1_fl + obj_proj.cos[0] * par2_fl
+    var dZ_fl = obj_proj.cos[0] * par1_fl + obj_proj.sin[0] * par2_fl
 
-    return [size.x * dX_fl / dZ_fl * size.y / size.x + camPos_vec[0], size.y * dY_fl / dZ_fl + camPos_vec[1]]
+    return [size.x * dX_fl / dZ_fl * size.y / size.x + obj_proj.pos[0], size.y * dY_fl / dZ_fl + obj_proj.pos[1]]
 }
 
 // get the cross product of two vectors with 3 elements (!)
@@ -94,15 +94,15 @@ function plotDisk(disk_obj, center_vec, rad_fl, norm1_vec, color_str, trans_fl) 
     let norm3_vec = normalize(crossProduct(norm1_vec, norm2_vec))
 
     // construct points on disk line and project to plane
-    let radPoint1_vec = projToPlane(addVec(center_vec, scalarMulti(norm2_vec, rad_fl)));
-    let radPoint2_vec = projToPlane(addVec(center_vec, scalarMulti(norm3_vec, rad_fl)));
-    let centerPro_vec = projToPlane(center_vec) 
+    let radPoint1_vec = projToPlane(addVec(center_vec, scalarMulti(norm2_vec, rad_fl)), view_proj);
+    let radPoint2_vec = projToPlane(addVec(center_vec, scalarMulti(norm3_vec, rad_fl)), view_proj);
+    let centerPro_vec = projToPlane(center_vec, view_proj) 
 
     // get radii of ellipse
     let rad1_fl = Math.sqrt(Math.pow(centerPro_vec[0] - radPoint1_vec[0], 2) +  Math.pow(centerPro_vec[1] - radPoint1_vec[1], 2));
     let rad2_fl = Math.sqrt(Math.pow(centerPro_vec[0] - radPoint2_vec[0], 2) +  Math.pow(centerPro_vec[1] - radPoint2_vec[1], 2));
 
-    // plot acutal ellipse
+    // plot actual ellipse
     disk_obj.beginFill(color_str, trans_fl);
     disk_obj.drawEllipse(centerPro_vec[0], centerPro_vec[1], rad1_fl, rad2_fl);
     disk_obj.endFill();
@@ -134,7 +134,7 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
     var dist_fl = 1000
     var maxI_fl = (pos_vec[2] - disExt_vec[0]) / dir_vec[2]
 
-    var relStart_vec = projToPlane(pos_vec)
+    var relStart_vec = projToPlane(pos_vec, view_proj)
     var maxDist_fl = magVec([relStart_vec[0] - end_vec[0], relStart_vec[1] - end_vec[1]])
     var saveI_dic = {inside: [], outside: []}
 
@@ -142,7 +142,7 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
     while (Math.abs(dist_fl - maxDist_fl) > 0.005 && z < 20) { //  && i < maxI_fl
 
         spacePos_vec = addVec(pos_vec, scalarMulti(dir_vec, - i))
-        relPos_vec = projToPlane(spacePos_vec)
+        relPos_vec = projToPlane(spacePos_vec, view_proj)
 
         //console.log([relPos_vec[0] - mid_vec[0], relPos_vec[1] - mid_vec[1]])
         dist_fl = magVec([relPos_vec[0] - end_vec[0], relPos_vec[1] - end_vec[1]])
@@ -212,7 +212,7 @@ function getMaxStepScreen(pos_vec, dir_vec) {
 
         z = z + 1
         spacePos_vec = addVec(pos_vec, scalarMulti(dir_vec, - i))
-        relPos_vec = projToPlane(spacePos_vec)
+        relPos_vec = projToPlane(spacePos_vec, view_proj)
 
         // compute violation of current point (as in how far its away from border, both directions!)
         if (relPos_vec[0] < 0.5 * size.x) {

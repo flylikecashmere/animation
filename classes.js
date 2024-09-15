@@ -88,9 +88,10 @@ class aniCircle {
 
     // draw new circle 
     if (curPos_vec[2] > disExt_vec[0]) {
-      this.crc[0].clear();
+      //this.crc[0].clear();
       //plotDisk(this.crc[0], curPos_vec, rad_fl * rel2_fl, this.dir, color_str, trans_fl)
-      plotDisk(this.crc[1], curPos_vec, rad_fl * transferLogScale(rel1_fl, 2.718), this.dir, color_str, trans_fl)
+      plotDisk(this.crc[0], curPos_vec, rad_fl * transferLogScale(rel1_fl, 2.718), this.dir, color_str, trans_fl)
+
     }
 
 
@@ -105,33 +106,40 @@ class aniCircle {
       this.crc[i].clear();
     }
 
-    // project starting position
-    var projCam_arr = projToPlane([camPos_vec[0], camPos_vec[1], disExt_vec[1]])
-    var projDir_arr = normalize([x_fl - projCam_arr[0], y_fl - projCam_arr[1], 0])
 
-    // get direction and maximum steps to cross exit field of view
-    this.dir = normalize([camPos_vec[0] - x_fl, camPos_vec[1] - y_fl, disExt_vec[1] - disExt_vec[0]])
+    // new stuff
+    [x_fl, y_fl, disExt_vec[1]] // starting position (alternativ x und y hier???)
+    // movement direction
+
+
+    // project starting position
+    //var projCam_arr = projToPlane([camPos_vec[0], camPos_vec[1], disExt_vec[1]])
+    //var projDir_arr = normalize([x_fl - projCam_arr[0], y_fl - projCam_arr[1], 0])
+
+    // set direction
+    this.dir = normalize([0.0, 0.0, 1.0])
   
-    // get angle and relative distance from center
+    // get angle and relative distance from camera position
     this.ang = getAng(x_fl, y_fl)
-    
-    this.dis = magVec([x_fl - camPos_vec[0], y_fl - camPos_vec[1]]) / dia_fl
+    this.dis = magVec([x_fl - view_proj.pos[0], y_fl - view_proj.pos[1]]) / dia_fl
+
     this.rad = dia_fl * (rad_arr[0] + this.dis * rad_arr[1])
     
     // move starting position
-    if (this.dis < thrs_arr[1]) { // inner circles
-      this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1] * 0.9], scalarMulti(projDir_arr, thrs_arr[0] * 0.5 * dia_fl))
-      this.colorId = 1
-      var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[0])
-      this.dir = rotateVec(this.dir, -1 * camAng_vec[0], "z")
-      this.maxStep = getMaxStepCircle(this.pos, this.dir, addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1] * 0.9], scalarMulti(projDir_arr, thrs_arr[2] * 0.5 * dia_fl)))
-    } else { // outer circles
-      this.pos = addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1] * 0.9], scalarMulti(projDir_arr, thrs_arr[2] * 0.5 * dia_fl))
-      this.rad = radRatio_fl * this.rad
-      this.colorId = 0
-      var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[1])
-      this.maxStep = getMaxStepScreen(this.pos, this.dir)
-    }
+    //if (this.dis < thrs_arr[1]) { // inner circles
+      //this.pos = addVec([x_fl, y_fl, disExt_vec[1]], scalarMulti([Math.cos(this.ang), Math.sin(this.ang), 0], thrs_arr[0] * dia_fl))
+    this.pos = [x_fl, y_fl, disExt_vec[1]]
+    this.colorId = 1
+    var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[0])
+    //this.dir = rotateVec(this.dir, -1 * camAng_vec[0], "z")
+    this.maxStep = 5000 // getMaxStepCircle(this.pos, this.dir, addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1] * 0.9], scalarMulti(projDir_arr, thrs_arr[2] * 0.5 * dia_fl)))
+    //} else { // outer circles
+    //  this.pos = addVec([x_fl, y_fl, disExt_vec[1]], scalarMulti([Math.cos(this.ang), Math.sin(this.ang), 0], thrs_arr[2] * dia_fl))
+    //  this.rad = radRatio_fl * this.rad
+    //  this.colorId = 0
+    //  var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[1])
+    //  this.maxStep = 1000 // getMaxStepScreen(this.pos, this.dir)
+    //}
 
     
     // adjust tone
@@ -242,7 +250,7 @@ class aniCircle {
 
             // update counter if repetition has passed
             if (this.clcElp < itr_time) {
-              this.crc[1].clear();
+              this.crc[0].clear();
               cnt_int += 1;
               loop_time = Date.now() / 1000;
               playSound_boo = true;
@@ -261,6 +269,17 @@ class aniCircle {
     }
   } 
 }
+
+// saves data for projection
+class projData {
+  constructor(pos_vec, ang_vec) {
+    this.pos = pos_vec;
+    this.ang = ang_vec;
+    this.sin  = [Math.sin(ang_vec[0]), Math.sin(ang_vec[1]), Math.sin(ang_vec[2])]
+    this.cos = [Math.cos(ang_vec[0]), Math.cos(ang_vec[1]), Math.cos(ang_vec[2])]
+  }
+}
+
 
 function checkDist(lastPos_dic, curPos_dic) {
   dist_fl = Math.pow(Math.pow(lastPos_dic.x - curPos_dic.x, 2) + Math.pow(lastPos_dic.y - curPos_dic.y, 2), 0.5)

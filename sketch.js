@@ -34,16 +34,14 @@ const size = {x: size_fl, y: size_fl*rat_fl}
 const dia_fl = Math.sqrt(size.x * size.x + size.y * size.y)
 
 // camera position and angle
-const camPos_vec = [size.x * 0.5, size.y * (1 - Math.pow(1.618,-6))]
-const camAng_vec = [- Math.PI / 128, 0.0, 0.0]
+const view_proj = new projData([size.x * 0.5, size.y * (1 - Math.pow(1.618,-6))], [- Math.PI / 128 * 0, 0.0, 0.0])
+console.log(view_proj)
+//-> wie 3d???
+
 
 // maximum and minimum distance of object from viewer
 const disExt_vec = [300, 3000]
 const frmRate_int = 32;
-
-// sinus and cosinus of projection agle
-const camSin_vec = [Math.sin(camAng_vec[0]), Math.sin(camAng_vec[1]), Math.sin(camAng_vec[2])]
-const camCos_vec = [Math.cos(camAng_vec[0]), Math.cos(camAng_vec[1]), Math.cos(camAng_vec[2])]
 
 
 app = startCanvas() 
@@ -123,14 +121,15 @@ app.ticker.add(() => {
 
 const graphics = new PIXI.Graphics();
 graphics.beginFill(0xFF0000);
-graphics.drawCircle(camPos_vec[0], camPos_vec[1], 50);
+graphics.drawCircle(view_proj.pos[0], view_proj.pos[1], 50);
 graphics.endFill();
 //app.stage.addChild(graphics);
 
 
 
-// 3) schatten
-// 2) steuere framerate variabel
+// 1) schatten (define a projection as an object, use as input for projPlane -> schachtel mit anderer funktion) 
+// 2) anpassung winkel innen / aussen etc.
+// 3) steuere framerate variabel
 // 4) überlege verknüpfung der kreise für späteren sound effekt
 // 5) mache arrangement rund (grösse, tempo etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit
 
