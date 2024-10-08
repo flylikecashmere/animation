@@ -90,9 +90,11 @@ class aniCircle {
     if (curPos_vec[2] > disExt_vec[0]) {
       //this.crc[0].clear();
       //plotDisk(this.crc[0], curPos_vec, rad_fl * rel2_fl, this.dir, color_str, trans_fl)
-      plotDisk(this.crc[0], curPos_vec, rad_fl * transferLogScale(rel1_fl, 2.718), this.dir, color_str, trans_fl)
-
+      var scaRad_fl = rad_fl * transferLogScale(rel1_fl, 2.718)
+      plotDisk(this.crc[0], curPos_vec, scaRad_fl, scaRad_fl, this.dir, color_str, trans_fl)
+      plotShadow(this.crc[0], curPos_vec, scaRad_fl, this.dir, light1_vec, [0,1,0], floor_vec, color_str, trans_fl) 
     }
+
 
 
   }

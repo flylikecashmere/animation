@@ -21,7 +21,7 @@ function transferPolyScale(val_fl, base_fl, offset_fl) {
 }
 
 // distribute range 'inter' into 'step' steps with given 'ratio' corrected by 'scale'
-function distVal(ratio,sca,step,inter,type) {
+function distVal(ratio, sca, step, inter, type) {
    
     let step_arr = new Array(step);
     let stepSum_fl = 0.0;

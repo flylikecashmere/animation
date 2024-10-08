@@ -68,7 +68,7 @@ function plotPlane(points_arr) {
 }
 
 // plot a 3d plane projected to the camera plane
-function plotDisk(disk_obj, center_vec, rad_fl, norm1_vec, color_str, trans_fl) {
+function plotDisk(disk_obj, center_vec, rad1_fl, rad2_fl, norm1_vec, color_str, trans_fl) {
 
     // get non colinear vector
     norm1_vec = normalize(norm1_vec)
@@ -94,24 +94,28 @@ function plotDisk(disk_obj, center_vec, rad_fl, norm1_vec, color_str, trans_fl) 
     let norm3_vec = normalize(crossProduct(norm1_vec, norm2_vec))
 
     // construct points on disk line and project to plane
-    let radPoint1_vec = projToPlane(addVec(center_vec, scalarMulti(norm2_vec, rad_fl)), view_proj);
-    let radPoint2_vec = projToPlane(addVec(center_vec, scalarMulti(norm3_vec, rad_fl)), view_proj);
+    let radPoint1_vec = projToPlane(addVec(center_vec, scalarMulti(norm2_vec, rad1_fl)), view_proj);
+    let radPoint2_vec = projToPlane(addVec(center_vec, scalarMulti(norm3_vec, rad2_fl)), view_proj);
     let centerPro_vec = projToPlane(center_vec, view_proj) 
 
     // get radii of ellipse
-    let rad1_fl = Math.sqrt(Math.pow(centerPro_vec[0] - radPoint1_vec[0], 2) +  Math.pow(centerPro_vec[1] - radPoint1_vec[1], 2));
-    let rad2_fl = Math.sqrt(Math.pow(centerPro_vec[0] - radPoint2_vec[0], 2) +  Math.pow(centerPro_vec[1] - radPoint2_vec[1], 2));
+    let radPro1_fl = Math.sqrt(Math.pow(centerPro_vec[0] - radPoint1_vec[0], 2) +  Math.pow(centerPro_vec[1] - radPoint1_vec[1], 2));
+    let radPro2_fl = Math.sqrt(Math.pow(centerPro_vec[0] - radPoint2_vec[0], 2) +  Math.pow(centerPro_vec[1] - radPoint2_vec[1], 2));
 
     // plot actual ellipse
     disk_obj.beginFill(color_str, trans_fl);
-    disk_obj.drawEllipse(centerPro_vec[0], centerPro_vec[1], rad1_fl, rad2_fl);
+    disk_obj.drawEllipse(centerPro_vec[0], centerPro_vec[1], radPro1_fl, radPro2_fl);
     disk_obj.endFill();
 
 }
 
-// get the dot product of two vectors with 2 elements (!)
+// get the dot product of two vectors
 function dotProduct(a_vec, b_vec) {
-    return a_vec[0] * b_vec[0] + a_vec[1] * b_vec[1]
+    let prod_fl = 0;
+    for (let i = 0; i < a_vec.length; i++) {
+        prod_fl += a_vec[i] * b_vec[i];
+    }
+    return prod_fl
 }
 
 // get the length of a vector with 2 elements (!)
@@ -125,7 +129,6 @@ function angleVec(a_vec, b_vec) {
     var clamCos_fl = Math.max(-1, Math.min(1, cos_fl)); // deals with small differences
     return Math.acos(clamCos_fl);
 }
-
 
 // get maximum steps until element has relative difference from mid point
 function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
@@ -144,15 +147,9 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
         spacePos_vec = addVec(pos_vec, scalarMulti(dir_vec, - i))
         relPos_vec = projToPlane(spacePos_vec, view_proj)
 
-        //console.log([relPos_vec[0] - mid_vec[0], relPos_vec[1] - mid_vec[1]])
         dist_fl = magVec([relPos_vec[0] - end_vec[0], relPos_vec[1] - end_vec[1]])
 
         z = z + 1
-        console.log("next")
-        console.log(i)
-        console.log(relPos_vec)
-        console.log(dist_fl)
-        console.log(maxDist_fl)
         
         if (dist_fl > maxDist_fl) { // point is outside
         
@@ -298,3 +295,83 @@ function multiMatVec(in_mat, in_vec) {
         in_mat[2][0] * in_vec[0] + in_mat[2][1] * in_vec[1] + in_mat[2][2] * in_vec[2]
     ];
 }
+
+function subVec(in1_vec, in2_vec) {
+    return addVec(in1_vec, scalarMulti(in2_vec, -1.0))
+}
+
+// plot the shadow of the disk
+function plotShadow(disk_obj, center_vec, rad_fl, norm1_vec, light_vec, planeNormal_vec, plainePoint_vec, shadowColor_str, trans_fl) {
+
+    // Get two vectors on the disk as you did before
+    norm1_vec = normalize(norm1_vec);
+
+    let nonCol_vec = [0.0, 0.0, 0.0];
+    let eqZ_boo = true;
+    let neqZ_boo = true;
+    let i = 0;
+    while (i < norm1_vec.length) {
+        if (norm1_vec[i] !== 0 && eqZ_boo) {
+            nonCol_vec[i] = -norm1_vec[i];
+            eqZ_boo = false;
+        } else if (norm1_vec[i] == 0 && neqZ_boo) {
+            nonCol_vec[i] = 1.0;
+            neqZ_boo = false;
+        }
+        i++;
+    }
+
+    let norm2_vec = normalize(crossProduct(norm1_vec, normalize(nonCol_vec)));
+    let norm3_vec = normalize(crossProduct(norm1_vec, norm2_vec));
+
+    // Project points on the disk to the shadow plane
+    let diskEdge1_vec = addVec(center_vec, scalarMulti(norm2_vec, rad_fl));
+    let diskEdge2_vec = addVec(center_vec, scalarMulti(norm3_vec, rad_fl));
+
+    // get shadow points on the plane
+    let shadowEdge1_vec = projectToShadowPlane(diskEdge1_vec, light_vec, planeNormal_vec, plainePoint_vec);
+    let shadowEdge2_vec = projectToShadowPlane(diskEdge2_vec, light_vec, planeNormal_vec, plainePoint_vec);
+    let shadowCenter_vec = projectToShadowPlane(center_vec, light_vec, planeNormal_vec, plainePoint_vec);
+
+    if (!shadowEdge1_vec || !shadowEdge2_vec || !shadowCenter_vec) {
+        console.log("No shadow projection possible, light is parallel to the plane.");
+        return;
+    }
+    
+    // now project the shadow points onto the camera plane
+    let shadowPoint1_proj = projToPlane(shadowEdge1_vec, view_proj);
+    let shadowPoint2_proj = projToPlane(shadowEdge2_vec, view_proj);
+    let shadowCenter_proj = projToPlane(shadowCenter_vec, view_proj);
+
+    // compute radius of shadow
+    const rad2_fl = Math.sqrt(Math.pow(shadowPoint1_proj[1] - shadowCenter_proj[1],2) + (Math.pow(shadowPoint1_proj[0] - shadowCenter_proj[0],2) * (shadowPoint2_proj[1] - shadowPoint1_proj[1]) * (shadowPoint2_proj[1] + shadowPoint1_proj[1] - 2 * shadowCenter_proj[1])) / ((shadowPoint1_proj[0] - shadowPoint2_proj[0]) * (shadowPoint1_proj[0] + shadowPoint2_proj[0] - 2 * shadowCenter_proj[0])))
+    const rad1_fl = rad2_fl * Math.sqrt(((shadowPoint1_proj[0] - shadowPoint2_proj[0]) * (shadowPoint1_proj[0] + shadowPoint2_proj[0] - 2 * shadowCenter_proj[0]))/ ((shadowPoint2_proj[1] - shadowPoint1_proj[1]) * (shadowPoint2_proj[1] + shadowPoint1_proj[1] - 2 * shadowCenter_proj[1])))
+
+    // draw shadow
+    disk_obj.beginFill(shadowColor_str, trans_fl);
+    disk_obj.drawEllipse(shadowCenter_proj[0], shadowCenter_proj[1], rad1_fl, rad2_fl);
+    disk_obj.endFill();
+ 
+}
+
+// function to compute the intersection of a ray with a plane (shadow projection)
+function projectToShadowPlane(point_vec, light_vec, planeNormal_vec, plainePoint_vec) {
+    
+    // ray from the light through the point
+    let ray_vec = subVec(point_vec, light_vec);
+
+    // find the t value where the ray intersects the plane
+    let numerator = dotProduct(planeNormal_vec, subVec(plainePoint_vec, light_vec));
+    let denominator = dotProduct(planeNormal_vec, ray_vec);
+
+    // avoid divide by zero (light parallel to the plane)
+    if (Math.abs(denominator) < 1e-6) return null;
+
+    let t = numerator / denominator;
+
+    // calculate the intersection point (shadow on the plane)
+    let shadow_vec = addVec(light_vec, scalarMulti(ray_vec, t));
+
+    return shadow_vec;
+}
+
