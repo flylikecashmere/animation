@@ -142,7 +142,7 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
     var saveI_dic = {inside: [], outside: []}
 
     var z = 1
-    while (Math.abs(dist_fl - maxDist_fl) > 0.005 && z < 20) { //  && i < maxI_fl
+    while (Math.abs(dist_fl - maxDist_fl) > 0.005 && z < 20 && i < maxI_fl) {
 
         spacePos_vec = addVec(pos_vec, scalarMulti(dir_vec, - i))
         relPos_vec = projToPlane(spacePos_vec, view_proj)
@@ -171,7 +171,7 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
         }
 
         if (i > maxI_fl) {
-        //    i = maxI_fl
+            i = maxI_fl
         }
     }
 

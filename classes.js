@@ -92,7 +92,7 @@ class aniCircle {
       //plotDisk(this.crc[0], curPos_vec, rad_fl * rel2_fl, this.dir, color_str, trans_fl)
       var scaRad_fl = rad_fl * transferLogScale(rel1_fl, 2.718)
       plotDisk(this.crc[0], curPos_vec, scaRad_fl, scaRad_fl, this.dir, color_str, trans_fl)
-      plotShadow(this.crc[0], curPos_vec, scaRad_fl, this.dir, light1_vec, [0,1,0], floor_vec, color_str, trans_fl) 
+      plotShadow(this.crc[0], curPos_vec, scaRad_fl, this.dir, light1_vec, [0,1,0], floor_vec, color_str, 0.1 * trans_fl) 
     }
 
 
@@ -108,16 +108,6 @@ class aniCircle {
       this.crc[i].clear();
     }
 
-
-    // new stuff
-    [x_fl, y_fl, disExt_vec[1]] // starting position (alternativ x und y hier???)
-    // movement direction
-
-
-    // project starting position
-    //var projCam_arr = projToPlane([camPos_vec[0], camPos_vec[1], disExt_vec[1]])
-    //var projDir_arr = normalize([x_fl - projCam_arr[0], y_fl - projCam_arr[1], 0])
-
     // set direction
     this.dir = normalize([0.0, 0.0, 1.0])
   
@@ -127,14 +117,15 @@ class aniCircle {
 
     this.rad = dia_fl * (rad_arr[0] + this.dis * rad_arr[1])
     
-    // move starting position
+    // move starting positiona
     //if (this.dis < thrs_arr[1]) { // inner circles
       //this.pos = addVec([x_fl, y_fl, disExt_vec[1]], scalarMulti([Math.cos(this.ang), Math.sin(this.ang), 0], thrs_arr[0] * dia_fl))
     this.pos = [x_fl, y_fl, disExt_vec[1]]
+    console.log(this.pos)
     this.colorId = 1
     var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[0])
     //this.dir = rotateVec(this.dir, -1 * camAng_vec[0], "z")
-    this.maxStep = 5000 // getMaxStepCircle(this.pos, this.dir, addVec([camPos_vec[0], camPos_vec[1], disExt_vec[1] * 0.9], scalarMulti(projDir_arr, thrs_arr[2] * 0.5 * dia_fl)))
+    this.maxStep = getMaxStepCircle(this.pos, this.dir, addVec(this.pos, scalarMulti(this.pos, thrs_arr[2] * dia_fl)))
     //} else { // outer circles
     //  this.pos = addVec([x_fl, y_fl, disExt_vec[1]], scalarMulti([Math.cos(this.ang), Math.sin(this.ang), 0], thrs_arr[2] * dia_fl))
     //  this.rad = radRatio_fl * this.rad

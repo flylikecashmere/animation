@@ -36,8 +36,8 @@ const dia_fl = Math.sqrt(size.x * size.x + size.y * size.y)
 
 // camera position and angle
 const light1_vec = [768, 400, 300]
-const floor_vec = [0, size.y * 0.9, 0]
-const view_proj = new projData([size.x * 0.5, size.y * (1 - Math.pow(1.618,-6))], [- Math.PI / 128 * 0, 0.0, 0.0])
+const floor_vec = [0, size.y, 0]
+const view_proj = new projData([size.x * 0.5, size.y * 1.0], [- Math.PI / 64 * 0, 0.0, 0.0])
 
 // maximum and minimum distance of object from viewer
 const disExt_vec = [300, 3000]
@@ -115,20 +115,12 @@ function handleRelease(event) {
 hammer.on('pressup', handleRelease);
 hammer.on('panend', handleRelease);
 
-app.ticker.add(() => {
-});
-
-
-
-
-
-// 1) schatten (define a projection as an object, use as input for projPlane -> schachtel mit anderer funktion)
-// get correct x position -> get correct radius
-// Problem: points are right, but radius computation is not -> problem is norm vectors -> i need to get new points from new norm vectors in second step of projection
-// 2) anpassung winkel innen / aussen etc.
-// 3) steuere framerate variabel
-// 4) überlege verknüpfung der kreise für späteren sound effekt
-// 5) mache arrangement rund (grösse, tempo etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit
+ 
+// 1) anpassung: korrektes ende und verblassen 
+// 2) winkel innen/aussen, kamera position,  
+// 3) mache arrangement rund (grösse, tempo etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit
+// 3a) überlege verknüpfung der kreise für späteren sound effekt
+// 3b) steuere framerate variabel
 
 
 // sound:
@@ -143,18 +135,14 @@ app.ticker.add(() => {
 // pattern: timing kontrollieren (mindestabstand chords untereinander, obertöne offbeat)
 // bonus: leichte variation der farben je nach ton, add randomnes, verblassen
 
-
-
-
-
 /*
 // plot lines and lightsource as a point for orientation
+graphics = new PIXI.Graphics()
 
 let test_vec = projToPlane(light1_vec, view_proj);
 graphics.beginFill("red");
 graphics.drawCircle(test_vec[0], test_vec[1], 5);
 graphics.endFill();
-
 
 let x_arr = [0, size.x];
 let y_arr = [0, size.y];
@@ -172,4 +160,8 @@ for (let x of x_arr) {
     line1.lineStyle(2.0, 0xffffff).moveTo(p1_vec[0], p1_vec[1]).lineTo(p2_vec[0], p2_vec[1]);
   }
 }
+
 */
+
+app.ticker.add(() => {
+});
