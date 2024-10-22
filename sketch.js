@@ -33,14 +33,17 @@ const rat_fl = window.outerHeight/window.innerWidth; // factor for size in y-dir
 const size = {x: size_fl, y: size_fl*rat_fl}
 const dia_fl = Math.sqrt(size.x * size.x + size.y * size.y)
 
+console.log(size)
+// focal length and ploting threshold 
+const disExt_vec = [1000, 5000]
 
-// camera position and angle
-const light1_vec = [768, 400, 300]
+// camera position and angle in global coordinates
+const view_proj = new projData([0.5 * size.x, 0.5 * size.y,  0], [Math.PI / 64 * 0, 0.0, 0.0])
+
+// light position and reflection plane
+const light1_vec = [size.x, size.y, 2000]
 const floor_vec = [0, size.y, 0]
-const view_proj = new projData([size.x * 0.5, size.y * 1.0], [- Math.PI / 64 * 0, 0.0, 0.0])
 
-// maximum and minimum distance of object from viewer
-const disExt_vec = [300, 3000]
 const frmRate_int = 32;
 
 
@@ -116,9 +119,10 @@ hammer.on('pressup', handleRelease);
 hammer.on('panend', handleRelease);
 
  
-// 1) anpassung: korrektes ende und verblassen 
-// 2) winkel innen/aussen, kamera position,  
-// 3) mache arrangement rund (grösse, tempo etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit
+
+// 1) passe plotting and neue 3d funktionen an -> mache grund bewegung rund
+// 2) anpassung: korrektes ende
+// 3) mache arrangement rund (grösse, tempo variabel? etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit
 // 3a) überlege verknüpfung der kreise für späteren sound effekt
 // 3b) steuere framerate variabel
 
@@ -135,33 +139,61 @@ hammer.on('panend', handleRelease);
 // pattern: timing kontrollieren (mindestabstand chords untereinander, obertöne offbeat)
 // bonus: leichte variation der farben je nach ton, add randomnes, verblassen
 
-/*
+let lam_fl = 20.0
+let projPlane_vec = [0, 0, disExt_vec[0]]
+
+
+math.add(view_proj.pos, math.multiply(math.multiply(math.transpose(view_proj.rotMat), lam_fl), convertCamCord(projPlane_vec, view_proj)))
+
+//view_proj
+//
+
+
+
 // plot lines and lightsource as a point for orientation
 graphics = new PIXI.Graphics()
 
-let test_vec = projToPlane(light1_vec, view_proj);
-graphics.beginFill("red");
-graphics.drawCircle(test_vec[0], test_vec[1], 5);
-graphics.endFill();
+//let test_vec = projectPoint(light1_vec, view_proj);
+//graphics.beginFill("red");
+//graphics.drawCircle(test_vec[0], test_vec[1], 5);
+//graphics.endFill();
+//app.stage.addChild(graphics);
 
 let x_arr = [0, size.x];
 let y_arr = [0, size.y];
 
+
 for (let x of x_arr) {
   for (let y of y_arr) {
 
+    console.log("next corner")
+    console.log([x,y])
+    //console.log(math.add(view_proj.pos, math.multiply(math.multiply(math.transpose(view_proj.rotMat), 1.0))))
+
+    // get start and end point in 3d space
+    let p1Raw_vec = math.add(view_proj.pos, math.multiply(math.multiply(math.transpose(view_proj.rotMat), 1.0), convertCamCord([x, y, disExt_vec[0]], view_proj)))
+    let p2Raw_vec = math.add(view_proj.pos, math.multiply(math.multiply(math.transpose(view_proj.rotMat), 1.0), convertCamCord([x, y, disExt_vec[1]], view_proj)))
+
+    console.log(p1Raw_vec)
+    console.log(p2Raw_vec)
+
     // project start and end point
-    let p1_vec = projToPlane([x, y, disExt_vec[0]], view_proj)
-    let p2_vec = projToPlane([x, y, disExt_vec[1]], view_proj)
+    let p1_vec = projectPoint(mat2arr(p1Raw_vec), view_proj)
+    let p2_vec = projectPoint(mat2arr(p2Raw_vec), view_proj)
+    
+    console.log(p1_vec)
+    console.log(p2_vec)
     
     // draw line
     let line1 = new PIXI.Graphics();
-    app.stage.addChild(line1);
     line1.lineStyle(2.0, 0xffffff).moveTo(p1_vec[0], p1_vec[1]).lineTo(p2_vec[0], p2_vec[1]);
+    app.stage.addChild(line1);
+
   }
 }
 
-*/
+
+
 
 app.ticker.add(() => {
 });

@@ -268,10 +268,15 @@ class projData {
   constructor(pos_vec, ang_vec) {
     this.pos = pos_vec;
     this.ang = ang_vec;
-    this.sin  = [Math.sin(ang_vec[0]), Math.sin(ang_vec[1]), Math.sin(ang_vec[2])]
-    this.cos = [Math.cos(ang_vec[0]), Math.cos(ang_vec[1]), Math.cos(ang_vec[2])]
+    this.rotMat = math.matrix([
+      [Math.cos(ang_vec[1]) * Math.cos(ang_vec[2]), Math.cos(ang_vec[1]) * Math.sin(ang_vec[2]), - Math.sin(ang_vec[1])],
+      [Math.sin(ang_vec[0]) * Math.sin(ang_vec[1]) * Math.cos(ang_vec[2]) - Math.cos(ang_vec[0]) * Math.sin(ang_vec[2]), Math.sin(ang_vec[0]) * Math.sin(ang_vec[1]) * Math.sin(ang_vec[2]) + Math.cos(ang_vec[0]) * Math.cos(ang_vec[2]), Math.sin(ang_vec[0]) * Math.cos(ang_vec[1])],
+      [Math.cos(ang_vec[0]) * Math.sin(ang_vec[1]) * Math.cos(ang_vec[2]) + Math.sin(ang_vec[0]) * Math.sin(ang_vec[2]), Math.cos(ang_vec[0]) * Math.sin(ang_vec[1]) * Math.sin(ang_vec[2]) - Math.sin(ang_vec[0]) * Math.cos(ang_vec[2]), Math.cos(ang_vec[0]) * Math.cos(ang_vec[1])]])
   }
 }
+
+
+
 
 
 function checkDist(lastPos_dic, curPos_dic) {

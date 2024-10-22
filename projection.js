@@ -1,20 +1,25 @@
 
-// project 3d object to camera plane
-function projToPlane(point_vec, obj_proj) {
 
-    // relative points
-    var x_fl = point_vec[0] - obj_proj.pos[0]
-    var y_fl = point_vec[1] - obj_proj.pos[1]
-    var z_fl = point_vec[2]
+// convert point vector from global coordinates to camera coordinates
+function convertCamCord(point_vec, obj_proj) {
+    let cam_mat = math.multiply(obj_proj.rotMat, [point_vec[0] - obj_proj.pos[0], point_vec[1] - obj_proj.pos[1], point_vec[2] - obj_proj.pos[2]])
+    return [cam_mat._data[0], cam_mat._data[1], cam_mat._data[2]]
+}
 
-    // projection parameters
-    var par1_fl = (obj_proj.cos[1] * z_fl + obj_proj.sin[1] * (obj_proj.sin[2] * y_fl + obj_proj.cos[2] * x_fl)) 
-    var par2_fl = (obj_proj.cos[2] * y_fl + obj_proj.sin[2] * x_fl)
-    var dX_fl = obj_proj.cos[1] * (obj_proj.sin[2] * y_fl + obj_proj.cos[2] * x_fl) - obj_proj.sin[1] * z_fl
-    var dY_fl = obj_proj.sin[0] * par1_fl + obj_proj.cos[0] * par2_fl
-    var dZ_fl = obj_proj.cos[0] * par1_fl + obj_proj.sin[0] * par2_fl
+// convert point vector from camera coordinates to image plane
+function convertImgPlane(point_vec, obj_proj) {
+    console.log(point_vec)
+    return [obj_proj.pos[0] + point_vec[0] / point_vec[2] * disExt_vec[0], obj_proj.pos[1] + point_vec[1] / point_vec[2] * disExt_vec[0]]
+}
 
-    return [size.x * dX_fl / dZ_fl * size.y / size.x + obj_proj.pos[0], size.y * dY_fl / dZ_fl + obj_proj.pos[1]]
+// convert point from global coordinates to image plane
+function projectPoint(point_vec, obj_proj) {
+    return convertImgPlane(convertCamCord(point_vec, obj_proj), obj_proj)
+}  
+
+// convert 3-element matrix to common array
+function mat2arr(in_mat) { 
+    return [in_mat._data[0], in_mat._data[1], in_mat._data[2]]
 }
 
 // get the cross product of two vectors with 3 elements (!)
@@ -141,6 +146,8 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
     var maxDist_fl = magVec([relStart_vec[0] - end_vec[0], relStart_vec[1] - end_vec[1]])
     var saveI_dic = {inside: [], outside: []}
 
+    return maxI_fl
+    /*
     var z = 1
     while (Math.abs(dist_fl - maxDist_fl) > 0.005 && z < 20 && i < maxI_fl) {
 
@@ -176,7 +183,7 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
     }
 
     return i
-
+    */
 }
 
 // get maximum steps until element leaves screen
