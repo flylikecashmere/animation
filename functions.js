@@ -298,7 +298,7 @@ function revDic(dic) {
 // get angle between 0 and 360
 function getAng(x_fl, y_fl) {
 
-    var projCam_vec = projToPlane([view_proj.pos[0], view_proj.pos[1], disExt_vec[1]], view_proj)
+    var projCam_vec = projectPoint([view_proj.pos[0], view_proj.pos[1], disExt_vec[1]], view_proj)
     var ang_fl = angleVec([projCam_vec[0] - x_fl, projCam_vec[1] - y_fl], [0, 1]) * 57.2958
     
     if (x_fl > view_proj.pos[0]) {

@@ -3,12 +3,11 @@
 // convert point vector from global coordinates to camera coordinates
 function convertCamCord(point_vec, obj_proj) {
     let cam_mat = math.multiply(obj_proj.rotMat, [point_vec[0] - obj_proj.pos[0], point_vec[1] - obj_proj.pos[1], point_vec[2] - obj_proj.pos[2]])
-    return [cam_mat._data[0], cam_mat._data[1], cam_mat._data[2]]
+    return mat2arr(cam_mat)
 }
 
 // convert point vector from camera coordinates to image plane
 function convertImgPlane(point_vec, obj_proj) {
-    console.log(point_vec)
     return [obj_proj.pos[0] + point_vec[0] / point_vec[2] * disExt_vec[0], obj_proj.pos[1] + point_vec[1] / point_vec[2] * disExt_vec[0]]
 }
 
@@ -21,6 +20,19 @@ function projectPoint(point_vec, obj_proj) {
 function mat2arr(in_mat) { 
     return [in_mat._data[0], in_mat._data[1], in_mat._data[2]]
 }
+
+// creates line from camera through input point in camera coordinates (!) and returns value at lamda
+function viewLine(camIn_vec, lam_fl, obj_proj){
+    return mat2arr(math.add(obj_proj.pos, math.multiply(math.multiply(math.transpose(obj_proj.rotMat), lam_fl), camIn_vec)))
+}
+
+// get points at position z that is on the view line of the in_vec
+function imgPlaneToGlobal(in_vec, z_fl, obj_proj) {
+    let camIn_vec = convertCamCord(in_vec, obj_proj)
+    let lam_fl = (z_fl - obj_proj.pos[2]) / math.multiply(math.transpose(obj_proj.rotMat), camIn_vec)._data[2]
+    return viewLine(camIn_vec, lam_fl, obj_proj)
+}
+
 
 // get the cross product of two vectors with 3 elements (!)
 function crossProduct(a_vec, b_vec) {
@@ -99,9 +111,9 @@ function plotDisk(disk_obj, center_vec, rad1_fl, rad2_fl, norm1_vec, color_str, 
     let norm3_vec = normalize(crossProduct(norm1_vec, norm2_vec))
 
     // construct points on disk line and project to plane
-    let radPoint1_vec = projToPlane(addVec(center_vec, scalarMulti(norm2_vec, rad1_fl)), view_proj);
-    let radPoint2_vec = projToPlane(addVec(center_vec, scalarMulti(norm3_vec, rad2_fl)), view_proj);
-    let centerPro_vec = projToPlane(center_vec, view_proj) 
+    let radPoint1_vec = projectPoint(addVec(center_vec, scalarMulti(norm2_vec, rad1_fl)), view_proj);
+    let radPoint2_vec = projectPoint(addVec(center_vec, scalarMulti(norm3_vec, rad2_fl)), view_proj);
+    let centerPro_vec = projectPoint(center_vec, view_proj) 
 
     // get radii of ellipse
     let radPro1_fl = Math.sqrt(Math.pow(centerPro_vec[0] - radPoint1_vec[0], 2) +  Math.pow(centerPro_vec[1] - radPoint1_vec[1], 2));
@@ -142,7 +154,7 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
     var dist_fl = 1000
     var maxI_fl = (pos_vec[2] - disExt_vec[0]) / dir_vec[2]
 
-    var relStart_vec = projToPlane(pos_vec, view_proj)
+    var relStart_vec = projectPoint(pos_vec, view_proj)
     var maxDist_fl = magVec([relStart_vec[0] - end_vec[0], relStart_vec[1] - end_vec[1]])
     var saveI_dic = {inside: [], outside: []}
 
@@ -152,7 +164,7 @@ function getMaxStepCircle(pos_vec, dir_vec, end_vec) {
     while (Math.abs(dist_fl - maxDist_fl) > 0.005 && z < 20 && i < maxI_fl) {
 
         spacePos_vec = addVec(pos_vec, scalarMulti(dir_vec, - i))
-        relPos_vec = projToPlane(spacePos_vec, view_proj)
+        relPos_vec = projectPoint(spacePos_vec, view_proj)
 
         dist_fl = magVec([relPos_vec[0] - end_vec[0], relPos_vec[1] - end_vec[1]])
 
@@ -216,7 +228,7 @@ function getMaxStepScreen(pos_vec, dir_vec) {
 
         z = z + 1
         spacePos_vec = addVec(pos_vec, scalarMulti(dir_vec, - i))
-        relPos_vec = projToPlane(spacePos_vec, view_proj)
+        relPos_vec = projectPoint(spacePos_vec, view_proj)
 
         // compute violation of current point (as in how far its away from border, both directions!)
         if (relPos_vec[0] < 0.5 * size.x) {
@@ -340,25 +352,27 @@ function plotShadow(disk_obj, center_vec, rad_fl, norm1_vec, light_vec, planeNor
     let shadowEdge2_vec = projectToShadowPlane(diskEdge2_vec, light_vec, planeNormal_vec, plainePoint_vec);
     let shadowCenter_vec = projectToShadowPlane(center_vec, light_vec, planeNormal_vec, plainePoint_vec);
 
-    if (!shadowEdge1_vec || !shadowEdge2_vec || !shadowCenter_vec) {
-        console.log("No shadow projection possible, light is parallel to the plane.");
-        return;
+    if (shadowCenter_vec[2] > disExt_vec[0]) {
+
+        if (!shadowEdge1_vec || !shadowEdge2_vec || !shadowCenter_vec) {
+            console.log("No shadow projection possible, light is parallel to the plane.");
+            return;
+        }
+        
+        // now project the shadow points onto the camera plane
+        let shadowPoint1_proj = projectPoint(shadowEdge1_vec, view_proj);
+        let shadowPoint2_proj = projectPoint(shadowEdge2_vec, view_proj);
+        let shadowCenter_proj = projectPoint(shadowCenter_vec, view_proj);
+
+        // compute radius of shadow
+        const rad2_fl = Math.sqrt(Math.pow(shadowPoint1_proj[1] - shadowCenter_proj[1],2) + (Math.pow(shadowPoint1_proj[0] - shadowCenter_proj[0],2) * (shadowPoint2_proj[1] - shadowPoint1_proj[1]) * (shadowPoint2_proj[1] + shadowPoint1_proj[1] - 2 * shadowCenter_proj[1])) / ((shadowPoint1_proj[0] - shadowPoint2_proj[0]) * (shadowPoint1_proj[0] + shadowPoint2_proj[0] - 2 * shadowCenter_proj[0])))
+        const rad1_fl = rad2_fl * Math.sqrt(((shadowPoint1_proj[0] - shadowPoint2_proj[0]) * (shadowPoint1_proj[0] + shadowPoint2_proj[0] - 2 * shadowCenter_proj[0]))/ ((shadowPoint2_proj[1] - shadowPoint1_proj[1]) * (shadowPoint2_proj[1] + shadowPoint1_proj[1] - 2 * shadowCenter_proj[1])))
+
+        // draw shadow
+        disk_obj.beginFill(shadowColor_str, trans_fl);
+        disk_obj.drawEllipse(shadowCenter_proj[0], shadowCenter_proj[1], rad1_fl, rad2_fl);
+        disk_obj.endFill();
     }
-    
-    // now project the shadow points onto the camera plane
-    let shadowPoint1_proj = projToPlane(shadowEdge1_vec, view_proj);
-    let shadowPoint2_proj = projToPlane(shadowEdge2_vec, view_proj);
-    let shadowCenter_proj = projToPlane(shadowCenter_vec, view_proj);
-
-    // compute radius of shadow
-    const rad2_fl = Math.sqrt(Math.pow(shadowPoint1_proj[1] - shadowCenter_proj[1],2) + (Math.pow(shadowPoint1_proj[0] - shadowCenter_proj[0],2) * (shadowPoint2_proj[1] - shadowPoint1_proj[1]) * (shadowPoint2_proj[1] + shadowPoint1_proj[1] - 2 * shadowCenter_proj[1])) / ((shadowPoint1_proj[0] - shadowPoint2_proj[0]) * (shadowPoint1_proj[0] + shadowPoint2_proj[0] - 2 * shadowCenter_proj[0])))
-    const rad1_fl = rad2_fl * Math.sqrt(((shadowPoint1_proj[0] - shadowPoint2_proj[0]) * (shadowPoint1_proj[0] + shadowPoint2_proj[0] - 2 * shadowCenter_proj[0]))/ ((shadowPoint2_proj[1] - shadowPoint1_proj[1]) * (shadowPoint2_proj[1] + shadowPoint1_proj[1] - 2 * shadowCenter_proj[1])))
-
-    // draw shadow
-    disk_obj.beginFill(shadowColor_str, trans_fl);
-    disk_obj.drawEllipse(shadowCenter_proj[0], shadowCenter_proj[1], rad1_fl, rad2_fl);
-    disk_obj.endFill();
- 
 }
 
 // function to compute the intersection of a ray with a plane (shadow projection)

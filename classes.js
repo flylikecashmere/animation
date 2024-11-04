@@ -32,7 +32,6 @@ class interTracker {
 
 }
 
-
 class aniCircle {
   constructor() {
     this.pos = [0.0, 0.0, 0.0]
@@ -79,8 +78,6 @@ class aniCircle {
 
     // move disk
     var curPos_vec = addVec(this.pos, scalarMulti(this.dir, - transferLogScale(rel1_fl, Math.pow(2.718, 2)) * this.maxStep))
-    //console.log(transferLogScale(rel1_fl, Math.pow(2.718, 2)))
-    //console.log(curPos_vec)
 
     // control color and transparency
     var trans_fl = trans_arr[0] + trans_arr[1] * transferLogScale(rel2_fl, 2.718)
@@ -91,11 +88,10 @@ class aniCircle {
       //this.crc[0].clear();
       //plotDisk(this.crc[0], curPos_vec, rad_fl * rel2_fl, this.dir, color_str, trans_fl)
       var scaRad_fl = rad_fl * transferLogScale(rel1_fl, 2.718)
+
       plotDisk(this.crc[0], curPos_vec, scaRad_fl, scaRad_fl, this.dir, color_str, trans_fl)
-      plotShadow(this.crc[0], curPos_vec, scaRad_fl, this.dir, light1_vec, [0,1,0], floor_vec, color_str, 0.1 * trans_fl) 
+      plotShadow(this.crc[0], curPos_vec, scaRad_fl, this.dir, light1_vec, [0,1,0], floor_vec, color_str, 0.5 * trans_fl) 
     }
-
-
 
   }
 
@@ -113,29 +109,24 @@ class aniCircle {
   
     // get angle and relative distance from camera position
     this.ang = getAng(x_fl, y_fl)
-    this.dis = magVec([x_fl - view_proj.pos[0], y_fl - view_proj.pos[1]]) / dia_fl
+    this.dis = magVec([x_fl - view_proj.pos[0], y_fl - view_proj.pos[1]]) / magVec([- view_proj.pos[0], - view_proj.pos[1]])
 
     this.rad = dia_fl * (rad_arr[0] + this.dis * rad_arr[1])
     
-    // move starting positiona
-    //if (this.dis < thrs_arr[1]) { // inner circles
-      //this.pos = addVec([x_fl, y_fl, disExt_vec[1]], scalarMulti([Math.cos(this.ang), Math.sin(this.ang), 0], thrs_arr[0] * dia_fl))
-    this.pos = [x_fl, y_fl, disExt_vec[1]]
-    console.log(this.pos)
-    this.colorId = 1
-    var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[0])
-    //this.dir = rotateVec(this.dir, -1 * camAng_vec[0], "z")
-    this.maxStep = getMaxStepCircle(this.pos, this.dir, addVec(this.pos, scalarMulti(this.pos, thrs_arr[2] * dia_fl)))
-    //} else { // outer circles
-    //  this.pos = addVec([x_fl, y_fl, disExt_vec[1]], scalarMulti([Math.cos(this.ang), Math.sin(this.ang), 0], thrs_arr[2] * dia_fl))
-    //  this.rad = radRatio_fl * this.rad
-    //  this.colorId = 0
-    //  var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[1])
-    //  this.maxStep = 1000 // getMaxStepScreen(this.pos, this.dir)
-    //}
+    // set start position
+    this.pos = imgPlaneToGlobal([x_fl, y_fl, disExt_vec[0]], disExt_vec[1], view_proj)
 
-    
-    // adjust tone
+    // set step and maximum steps
+    var speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[0])
+    this.maxStep = getMaxStepCircle(this.pos, this.dir, addVec(this.pos, scalarMulti(this.pos, thrs_arr[2] * dia_fl)))
+
+    // set characteristics inner and outer circles
+    if (this.dis < thrs_arr[1]) { // inner circles
+      this.colorId = 1
+    } else { // outer circles
+      this.rad = radRatio_fl * this.rad
+      this.colorId = 0
+    }
 
     // add circles
     for (let i = 0; i < this.crc.length; i++) {
@@ -274,10 +265,6 @@ class projData {
       [Math.cos(ang_vec[0]) * Math.sin(ang_vec[1]) * Math.cos(ang_vec[2]) + Math.sin(ang_vec[0]) * Math.sin(ang_vec[2]), Math.cos(ang_vec[0]) * Math.sin(ang_vec[1]) * Math.sin(ang_vec[2]) - Math.sin(ang_vec[0]) * Math.cos(ang_vec[2]), Math.cos(ang_vec[0]) * Math.cos(ang_vec[1])]])
   }
 }
-
-
-
-
 
 function checkDist(lastPos_dic, curPos_dic) {
   dist_fl = Math.pow(Math.pow(lastPos_dic.x - curPos_dic.x, 2) + Math.pow(lastPos_dic.y - curPos_dic.y, 2), 0.5)

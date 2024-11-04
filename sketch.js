@@ -18,10 +18,10 @@ const minRep_int = 8; // minimum number of repetition
 const parCrc_int = 20 // number of circles that can be displayed at the same time
 
 const rad_arr = [0.04, 0.02 * 1.618] // minimum radius and distance dependant radius relative to diagonal 
-const trans_arr  = [0.02, 0.02] // minimum transparency and distance dependant component
+const trans_arr  = [0.2, 0.02] // minimum transparency and distance dependant component
 
 // setup parameters - inner and outer section
-const thrs_arr = [0.15, 0.15 * Math.pow(1.618,1), 0.15 * Math.pow(1.618,3)] // start radius for inner spawning, threshold for outer spawning, start radius for outer spawing
+const thrs_arr = [0.2, 0.2 * Math.pow(1.618,1)] // start radius for inner spawning, threshold for outer spawning, start radius for outer spawing
 const relSpeed_arr = [1.0, 2.0] // relative speed indicator for inner and outer section
 const radRatio_fl = 1 / 1.618 // ratio of outer-to-inner radius
 
@@ -35,13 +35,13 @@ const dia_fl = Math.sqrt(size.x * size.x + size.y * size.y)
 
 console.log(size)
 // focal length and ploting threshold 
-const disExt_vec = [1000, 5000]
+const disExt_vec = [500, 2000]
 
 // camera position and angle in global coordinates
-const view_proj = new projData([0.5 * size.x, 0.5 * size.y,  0], [Math.PI / 64 * 0, 0.0, 0.0])
+const view_proj = new projData([0.5 * size.x, 0.9 * size.y,  0], [Math.PI / 64, 0.0, 0.0])
 
 // light position and reflection plane
-const light1_vec = [size.x, size.y, 2000]
+const light1_vec = [0.5 * size.x,  - size.y, 500]
 const floor_vec = [0, size.y, 0]
 
 const frmRate_int = 32;
@@ -120,9 +120,9 @@ hammer.on('panend', handleRelease);
 
  
 
-// 1) passe plotting and neue 3d funktionen an -> mache grund bewegung rund
-// 2) anpassung: korrektes ende
-// 3) mache arrangement rund (grösse, tempo variabel? etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit
+// 1) steuer ende korrekt
+// 2) clean-up: welche funktionen noch relevant? wo besser math, als meine funktionen?
+// 3) mache arrangement rund (grösse, tempo variabel? etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit, sinus bewegung in x und y richtung?
 // 3a) überlege verknüpfung der kreise für späteren sound effekt
 // 3b) steuere framerate variabel
 
@@ -139,50 +139,50 @@ hammer.on('panend', handleRelease);
 // pattern: timing kontrollieren (mindestabstand chords untereinander, obertöne offbeat)
 // bonus: leichte variation der farben je nach ton, add randomnes, verblassen
 
-let lam_fl = 20.0
-let projPlane_vec = [0, 0, disExt_vec[0]]
 
 
-math.add(view_proj.pos, math.multiply(math.multiply(math.transpose(view_proj.rotMat), lam_fl), convertCamCord(projPlane_vec, view_proj)))
-
-//view_proj
-//
-
-
+/*
 
 // plot lines and lightsource as a point for orientation
 graphics = new PIXI.Graphics()
 
-//let test_vec = projectPoint(light1_vec, view_proj);
-//graphics.beginFill("red");
-//graphics.drawCircle(test_vec[0], test_vec[1], 5);
-//graphics.endFill();
-//app.stage.addChild(graphics);
+let camTest_vec = convertCamCord([0.25 * size.x, 0.25 * size.y,  disExt_vec[0]], view_proj)
+
+for (let l of [-20, -10, -2, -1, 1, 2, 10, 20]) {
+  let test_vec = projectPoint(viewLine(camTest_vec, l, view_proj), view_proj);
+  graphics.beginFill("red");
+  //console.log(test_vec)
+  graphics.drawCircle(test_vec[0], test_vec[1], 10);
+  graphics.endFill();
+}
+
+app.stage.addChild(graphics);
+
+//
 
 let x_arr = [0, size.x];
 let y_arr = [0, size.y];
 
-
 for (let x of x_arr) {
   for (let y of y_arr) {
 
-    console.log("next corner")
-    console.log([x,y])
+    //console.log("next corner")
+    //console.log([x,y])
     //console.log(math.add(view_proj.pos, math.multiply(math.multiply(math.transpose(view_proj.rotMat), 1.0))))
 
     // get start and end point in 3d space
     let p1Raw_vec = math.add(view_proj.pos, math.multiply(math.multiply(math.transpose(view_proj.rotMat), 1.0), convertCamCord([x, y, disExt_vec[0]], view_proj)))
     let p2Raw_vec = math.add(view_proj.pos, math.multiply(math.multiply(math.transpose(view_proj.rotMat), 1.0), convertCamCord([x, y, disExt_vec[1]], view_proj)))
 
-    console.log(p1Raw_vec)
-    console.log(p2Raw_vec)
+    //console.log(p1Raw_vec)
+    //console.log(p2Raw_vec)
 
     // project start and end point
     let p1_vec = projectPoint(mat2arr(p1Raw_vec), view_proj)
     let p2_vec = projectPoint(mat2arr(p2Raw_vec), view_proj)
     
-    console.log(p1_vec)
-    console.log(p2_vec)
+    //console.log(p1_vec)
+    //console.log(p2_vec)
     
     // draw line
     let line1 = new PIXI.Graphics();
@@ -192,8 +192,9 @@ for (let x of x_arr) {
   }
 }
 
-
+*/
 
 
 app.ticker.add(() => {
 });
+
