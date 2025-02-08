@@ -1,7 +1,30 @@
+
+// #region //! randomization
+
 // get random element of vector
 function randEle(vector) {
     return vector[Math.floor(Math.random()*vector.length)]
 }
+
+// get random value from a standard normal distribution using Box-Muller transform
+function standardNormalDis() {
+    return Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random())
+}
+
+// get random value from normal distribution
+function normalDis(mean,stdDev) {
+    return mean + standardNormalDis() * stdDev
+}
+
+// https://en.wikipedia.org/wiki/Exponential_distribution
+//jStat.exponential.sample(0.5) -> max 0.5, mean 1/0.5
+
+// https://en.wikipedia.org/wiki/Poisson_distribution
+//jStat.poisson.sample(0.5) -> mean 0.5
+
+// #endregion
+
+// #region //! interpolation and harmonic spacing
 
 // transfer to logarithmic scale
 function transferLogScale(val_fl, base_fl) {
@@ -18,6 +41,11 @@ function transferExpScale(val_fl, base_fl) {
 // transfer to polynomial scale
 function transferPolyScale(val_fl, base_fl, offset_fl) {
     return Math.abs(Math.pow(val_fl - offset_fl, base_fl)/Math.pow(1 - offset_fl, base_fl));
+}
+
+// linear interpolation
+function linInter(x, y1, y2, x1 = 0, x2 = 1) {
+    return y1 + ((x - x1) * (y2 - y1)) / (x2 - x1);
 }
 
 // distribute range 'inter' into 'step' steps with given 'ratio' corrected by 'scale'
@@ -45,77 +73,9 @@ function distVal(ratio, sca, step, inter, type) {
     return inter_arr
 }
 
-// get y coordinate of circle from rel position of x and radius
-function getCircleY(relX, rad) {
-    return Math.sqrt(Math.pow(rad, 2) - Math.pow(relX*rad, 2));
-}
-  
-// linear interpolation
-function linInter(x, y1, y2, x1 = 0, x2 = 1) {
-    return y1 + ((x - x1) * (y2 - y1)) / (x2 - x1);
-}
+// #endregion
 
-// get two relevant points from val_vec for interpolation (val_vec is array of array with 2 elements, first is x and second y for interpolation)
-function getRelVal(rad_fl, val_vec, end_fl) {
-
-    val_vec.push([end_fl, val_vec[0][1]])
-
-    for (let i = 0; i < val_vec.length - 1; i++) {
-        var cur_fl = val_vec[i][0];
-        var nxt_fl = val_vec[i + 1][0];
-        
-        if (rad_fl >= cur_fl && rad_fl <= nxt_fl) {
-            return [val_vec[i], val_vec[i + 1]];
-        }
-    }
-
-    return null
-
-}
-
-function radLinInter(rad_fl, val_vec) {
-    val_vec = getRelVal(rad_fl, val_vec, 360)
-
-    return linInter(rad_fl, val_vec[0][1], val_vec[1][1], val_vec[0][0], val_vec[1][0])
-}
-
-// checks if the specified time intervall in frames is over 
-function checkTimeInt(frm_int,frmInter_int) {
-    return frm_int % frmInter_int === 0
-}
-
-// substract values in two arrays from each other
-function subArr(arr1, arr2) {
-    return arr1.map((value, index) => value - arr2[index]);
-}
-
-// normalize length of direction vector
-function normalizeDir(dir_arr) {
-    vecL_fl = Math.sqrt(Math.pow(dir_arr[0],2) + Math.pow(dir_arr[1],2))
-    return dir_arr.map(function(x) { return x / vecL_fl; })
-}
-
-// convert time in seconds to cover x-distance to pixels per milli second
-function computeSpeed(timeX) {
-    return size.x / timeX
-}
-
-// get random value from a standard normal distribution using Box-Muller transform
-function standardNormalDis() {
-    return Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random())
-}
-
-// get random value from normal distribution
-function normalDis(mean,stdDev) {
-    return mean + standardNormalDis() * stdDev
-}
-
-// https://en.wikipedia.org/wiki/Exponential_distribution
-//jStat.exponential.sample(0.5) -> max 0.5, mean 1/0.5
-
-// https://en.wikipedia.org/wiki/Poisson_distribution
-//jStat.poisson.sample(0.5) -> mean 0.5
-
+// #region //! color handling
 
 // creates array of n-elements starting with zero
 function intArr(n) {
@@ -124,31 +84,6 @@ function intArr(n) {
         int_arr[i] = i;
     }
     return int_arr;
-}
-
-// difference of two arrays
-function diffArr(arr1, arr2) { // array with all elements, array with elements to be removed
-    return arr1.filter(item => !arr2.includes(item));
-}
-
-// check if elements touch limit
-function touchLimit(bounds_dic,check) { // array of graphic elements, string array with type of check and dimension
-    if (check[1] === "up") {
-      var check_boo = bounds_dic[check[0]][0] + bounds_dic[check[0]][1] > size[check[0]]
-    } else if (check[1] === "low") {
-      var check_boo = bounds_dic[check[0]][0] < 0
-    }
-    return check_boo
-}
-
-// check if elements are out of limit
-function outLimit(bounds_dic,check) { // array of graphic elements, string array with type of check and dimension
-    if (check[1] === "up") {
-        var check_boo = bounds_dic[check[0]][0] > size[check[0]] 
-    } else if (check[1] === "low") {
-        var check_boo = bounds_dic[check[0]][0] + bounds_dic[check[0]][1] < 0
-    }
-    return check_boo
 }
 
 // convert hex string into array of rgb colors
@@ -194,105 +129,14 @@ function interpolateHexPal(hex_arr,x) { // array of hex colors, relative value o
     start_int = Math.floor(x * (hex_arr.length - 1))
     // do interpolation and return
     return interpolateHex(hex_arr[start_int],hex_arr[start_int + 1],x - start_int / (hex_arr.length - 1))
-}    
-
-// check if object is in screen
-function checkBounds(obj,dim,type) { // object to check, dimensions and directions to check, touch or completely out
-
-    const bounds_obj = obj.getBounds();
-    const bounds_dic = {x: [bounds_obj.x, bounds_obj.width], y: [bounds_obj.y, bounds_obj.height]}
-    var out_boo = type === "touch" ? false : true
-
-    // check if specified dimensions are out of the screen
-    for (let j = 0; j < dim.length; j++) {
-        
-        if (type === "touch") { // check if object is touches screen limits (only has to be true for one check)
-
-            if (touchLimit(bounds_dic,dim[j])) { 
-                out_boo = true
-                break
-            }
-
-        } else if (type === "out") { // check if object is completely outside of screen limits (must be true for all checks)
-            if (out_boo && outLimit(bounds_dic,dim[j]))  { 
-                out_boo = true
-            } else {
-                out_boo = false
-            }
-
-        }
-    }
-
-    return out_boo
 }
 
-function pDicToArr(cordDic) {
-    return [cordDic.x, cordDic.y]
-}
+// #endregion
 
-function pArrToDic(pArr) {
-    return { x: pArr[0], y: pArr[1] }
-}
-
-// changes position of container to point mirrored on line
-function mirror(container,p1_arr,p2_arr) { // container, first point of line, second point of line
-
-    // get center of of container
-    const cent_arr = [container.x, container.y];
-  
-    if (p1_arr[0] === p2_arr[0]) { // vertical line
-      var projX_fl = p2_arr[0] + (p2_arr[0] - cent_arr[0])
-      var projY_fl = cent_arr[1]
-    } else if (p1_arr[1] === p2_arr[1]) { // horizontal line
-      var projX_fl = cent_arr[0]
-      var projY_fl = p2_arr[1] + (p2_arr[1] - cent_arr[1])
-    } else {
-      // equation for line crossing the two points
-      const slMirAx_fl = (p2_arr[1] - p1_arr[1]) / (p2_arr[0] - p1_arr[0]);
-      const yMirAx_fl = p2_arr[1] - p2_arr[0] * slMirAx_fl;
-      // compute orthogonal point on mirror axis
-      const yOrth_fl =  cent_arr[1] - cent_arr[0] * (-1 / slMirAx_fl);
-      const intSectX_fl = (yOrth_fl - yMirAx_fl) /  (slMirAx_fl + 1/slMirAx_fl)
-      // compute projected point
-      var projX_fl = intSectX_fl + (intSectX_fl - cent_arr[0])
-      var projY_fl = yOrth_fl + projX_fl * (-1 / slMirAx_fl)
-    }
-  
-    // adjust container position
-    container.position = {x: projX_fl, y: projY_fl}
-  
-}
-
-// group n numbers into x equal grups
-function groupNumbers(x, n) {
-    const grpN_dic = {};
-
-    // initialize output dictionary
-    for (let i = 0; i < x; i++) {
-        grpN_dic[i] = [];
-    }
-
-    // assign numbers to dictionary
-    for (let i = 0; i < n; i++) {
-        var k = Math.floor(i / (n/x));
-        grpN_dic[k].push(i);
-    }
-
-    return grpN_dic;
-}
-
-// reverse a dictionary that uses arrays for values
-function revDic(dic) {
-    const revDic = {};
-    // loop over keys
-    for (const key in dic) {
-        const val = dic[key];
-        // loop over respective values
-        for (let i = 0; i < val.length; i++) {
-            revDic[val[i]] = key;
-        }   
-    }
-    return revDic;
+// normalize length of direction vector
+function normalizeDir(dir_arr) {
+    vecL_fl = dir_arr.reduce((sum_fl, itr_fl) => sum_fl + Math.pow(itr_fl, 2), 0);
+    return dir_arr.map(function(x) { return x / vecL_fl; })
 }
 
 // get angle between 0 and 360
@@ -307,3 +151,10 @@ function getAng(x_fl, y_fl) {
         return 360 - ang_fl
     }
 }
+
+function checkDist(lastPos_dic, curPos_dic) {
+    dist_fl = Math.pow(Math.pow(lastPos_dic.x - curPos_dic.x, 2) + Math.pow(lastPos_dic.y - curPos_dic.y, 2), 0.5)
+    if (dist_fl > dia_fl / 2.718 / 2.718) {
+      cnt_int = cnt_int + 1
+    }
+  }
