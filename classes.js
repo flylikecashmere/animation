@@ -7,8 +7,6 @@ class beamAnimation {
 
     // #region // ! set geometric properties
 
-    console.log(y_fl)
-
     // set start position
     this.pos = imgPlaneToGlobal([x_fl, Math.min(yMax_fl * size.y, y_fl), disExt_vec[0]], disExt_vec[1], view_proj)
 
@@ -28,17 +26,17 @@ class beamAnimation {
     // #endregion
 
     // #region // ! furher declarations
-    
-    this.clcElp = 0; // time per repetition of circle in s
+  
     this.next = -1; // id of connected circle
     this.doStart = true; // enables starting animation
 
     if (this.dis < thrs_arr[1]) { // inner circles
-      this.track = 0
+      this.track = 0 // track of sequencer
+      this.length = beats_arr[0] / seq_obj.bpm * 60 //  time per repetition of circle in s
     } else { // outer circles
       this.track = 1
+      this.length = beats_arr[1] / seq_obj.bpm * 60
     }
-    
     // #endregion
 
     // #region // ! create sound
@@ -46,21 +44,21 @@ class beamAnimation {
     if (this.dis < thrs_arr[1]) { // inner circles
       
       this.note = chord_arr[aniCnt_int % chord_arr.length];
-
+      this.env = [0.381, 0.23, 0.23, 0.05] // time for attack, decay, release, and level of sustain
+  
       this.synth = new Tone.PolySynth(Tone.DuoSynth, {
         voice0: {
-          oscillator: { type: "sine" },  // Waveform for the first voice
-          envelope: { attack: 0.4, decay: maxElp_fl, sustain: 0.0, release: 0.5 },
-          volume: -6
+          oscillator: {type: "square"},  
+          envelope: {attack: this.env[0] * this.length, decay: this.env[1] * this.length, sustain: this.env[3], release: this.env[2] * this.length},
+          volume: -7
         },
         voice1: {
-            oscillator: { type: "square" }, // Waveform for the second voice
-            envelope: { attack: 0.5, decay: maxElp_fl, sustain: 0.0, release: 0.2 },
-            volume: -6
+            oscillator: { type: "sine" },
+            envelope: {attack: this.env[0] * this.length, decay: this.env[1] * this.length, sustain: this.env[3], release: this.env[2] * this.length},
+            volume: -8
         },
-        harmonicity: 1.5, // Frequency ratio between the two voices
-        //vibratoAmount: 1.0,
-        //vibratoRate: 1.0,
+        harmonicity: 2.0, // Frequency ratio between the two voices
+        vibratoAmount: 0.0,
         volume: -6,       // Lower the overall volume
         })
 
@@ -79,30 +77,25 @@ class beamAnimation {
           type: 'lowpass',
           frequency: 500, 
           rolloff: -12, 
-          Q: 1  
+          Q: 0.5  
       });
-
-      this.filterEnv = new Tone.Envelope({
-        attack: 0.2,
-        decay: 0.3,
-        sustain: 1.0,
-        release: 1.0,
-      });
-
-      this.filterEnv.connect(this.filter.Q);
 
       this.reverb = new Tone.Reverb({
-        preDelay: 0.3,
-        decay: 1.5,
+        preDelay: 0.0,
+        decay: this.env[1] * this.length * 0.236,
         wet: 0.5
       });
+      this.chorus = new Tone.Chorus(2, this.env[0] * this.length, 0.7).start(); // Stereo width
 
       this.synth.connect(this.filter);
-      this.filter.connect(this.reverb);
-      this.reverb.connect(masterCompressor)
-      //this.reverb.connect(masterCompressor);
-      //this.synth.set({ volume: -10000 });
+      this.filter.connect(this.chorus);
+      this.chorus.connect(this.reverb);
+     
+      this.reverb.toDestination()
 
+      //this.filterEnv.connect(this.filter.frequency);
+
+      //this.filterEnv.connect(this.filter.frequency);
       /*
       this.synth = new Tone.PolySynth(Tone.Synth, {
         oscillator: {
@@ -124,7 +117,7 @@ class beamAnimation {
         },
         filter: {
           type: "lowpass", // Lowpass filter
-          frequency: 100, // Filter cutoff frequency
+          frequency: 5000, // Filter cutoff frequency
           rolloff: -12, // Roll-off slope (-12, -24, -48 dB/octave)
           Q: 1, // Resonance (quality factor)
         },
@@ -144,7 +137,7 @@ class beamAnimation {
           exponent: 2, // Envelope curve (linear or exponential)
         },
       }).toDestination();
-      this.synth.volume.value = -16;
+      this.synth.volume.value = -2;
       /*
       this.synth = new Tone.MonoSynth().toDestination();
       this.synth.set({
@@ -187,32 +180,32 @@ class beamAnimation {
   startAnimationBeam() {
       let minTime_boo = false
       let clcStrt_time = Date.now() / 1000
-      let speedSca_fl = Math.pow(2.718, 2 * relSpeed_arr[0])
+      let clcElp_ts = 0
       
       const ani_obj = setInterval(() => {
-        this.clcElp = (Date.now() / 1000 - clcStrt_time);
+        clcElp_ts = (Date.now() / 1000 - clcStrt_time);
   
         // check if minimum time is met and play sound
-        if (this.clcElp > minElp_fl && !minTime_boo){
-          this.filterEnv.triggerAttack()
-          this.synth.triggerAttack(this.note)
+        if (clcElp_ts > minElp_fl && !minTime_boo){
+          //this.filterEnv.triggerAttack()
+          // this.synth.triggerAttack(this.note)
           minTime_boo = true;
         }
-      
+
         // stop the animation when time limit is reached or drawing stops but not before time minimum
-        if (this.clcElp >= maxElp_fl || !this.doStart) {
+        if (clcElp_ts >= this.length || !this.doStart) {
           // check if minimum time to repeat is met
           for (let i = 0; i < this.crc.length; i++) {
             this.crc[i].clear();
           }
-          this.filterEnv.triggerRelease()
-          this.synth.triggerRelease()
+          //this.filterEnv.triggerRelease()
+         // this.synth.triggerRelease()
           clearInterval(ani_obj);
         } else { // continues animation
           if (this.dis < thrs_arr[1]) {
-            this.growCircle(this.rad, transferExpScale(this.clcElp / maxElp_fl, speedSca_fl), this.clcElp / maxElp_fl, -1)
+            this.growCircle(this.rad, clcElp_ts / this.length, clcElp_ts / this.length, -1)
           } else {
-            this.growCircle(this.rad, transferLogScale(this.clcElp / maxElp_fl, speedSca_fl), this.clcElp / maxElp_fl, -1)
+            this.growCircle(this.rad, clcElp_ts / this.length, clcElp_ts / this.length, -1)
           }
         }
         
@@ -226,17 +219,17 @@ class beamAnimation {
     this.synth.set({
       envelope: {
           attack: 0.4,
-          decay: this.clcElp,
+          decay: this.length,
           sustain: 0.0,
           release: 0.0
       }
     });
 
     // compute number of repetitions
-    let rep_int = Math.floor(minRep_int + transferExpScale((this.clcElp - minElp_fl) /  maxElp_fl, Math.pow(2.718,-4)) * maxRep_int)
+    let rep_int = 5 // Math.floor(minRep_int + transferExpScale((this.length - minElp_fl) /  this.length, Math.pow(2.718,-4)) * maxRep_int)
 
     // add events to sequencer (track_id, start_fl, length_fl, repTot_int, checkOcc_int, in_dic)
-    let event_obj = new seqEvent(this.track, Date.now() / 1000, this.clcElp, rep_int, 1, {beam: this})
+    let event_obj = new seqEvent(this.track, Date.now() / 1000, this.length, rep_int, 1, {beam: this})
     seq_obj.addEvent(event_obj)
 
     console.log(seq_obj)
@@ -245,28 +238,83 @@ class beamAnimation {
   }
 
   animateBeam(rel_fl) {
-
+    
     // initialize
     let playSound_boo = true;
+    let chorFeqRel_fl = 8
     let loop_time = Date.now() / 1000;
+
+    // track timing
+    let lastItr_time = 0.0
+    let itr_time = 0.0
+    const soundLen_fl =  this.length * (1 - this.env[2])
+    this.chorus.frequency.value = 1 / (soundLen_fl / chorFeqRel_fl)
+
+    // variables of total envelope
+    let envVal_fl = 0.0 // current value
+    let totIntEnv_fl = 0.0 // integral
+    let maxVal_fl = 0.0 // maximum
+    let lastValTot_fl = 0.0 // last value
+    let intAccTot_fl = 0.0 // acceleration
+
+    // variable for current state of envelope
+    let curEnv_fl = 0.0 // current value
+    let lastVal_fl = 0.0 // last value
+    let intEnv_fl = 0.0  // integral
+    let accEnv_fl = 0.0 // acceleration
+    let minFreq_val = 1e6 // frequency value
+    let lfo_val = 0.0
 
     const ani_obj = setInterval(() => {
       
-      // grow circle
-      let itr_time = Date.now() / 1000 - loop_time
-      this.growCircle(this.rad, itr_time / this.clcElp, itr_time / maxElp_fl, 0.5) 
-      
+
+      lastItr_time = itr_time
+      itr_time = Date.now() / 1000 - loop_time
+
+      lfo_val = Math.sin(Math.PI + Math.PI * 2 * (itr_time % (soundLen_fl/chorFeqRel_fl)) / (soundLen_fl/chorFeqRel_fl)) 
+
       // play sound
-      if (playSound_boo && itr_time / this.clcElp > 0.05 ) {
+      if (playSound_boo) {
         var velo_fl = 1 - rel_fl
-        this.filterEnv.triggerAttackRelease("2")
-        this.synth.triggerAttackRelease(this.note, this.clcElp, "+0.0", velo_fl);
+        
+        this.synth.triggerAttackRelease(this.note, soundLen_fl, "+0.0", velo_fl);
+      
+        // compute integral of envelope
+        for (let i = 0; i < 500; i++) {
+          lastValTot_fl = envVal_fl
+          envVal_fl = this.synth._activeVoices[this.synth._activeVoices.length - 1].voice.voice0.envelope.getValueAtTime(Tone.now() + this.length * this.env[0] * i / 500)
+          totIntEnv_fl = totIntEnv_fl + envVal_fl / 500
+          intAccTot_fl = intAccTot_fl + Math.abs((envVal_fl - lastValTot_fl) / (this.length * this.env[0] / 500)) / 500 
+        }
+        //console.log(intAccTot_fl)
+
         playSound_boo = false;
       }
+      
+      // compute current values for envelope
+      lastVal_fl = curEnv_fl
+      curEnv_fl = this.synth._activeVoices[this.synth._activeVoices.length - 1].voice.voice0.envelope.getValueAtTime(Tone.now())
+      intEnv_fl = intEnv_fl + (itr_time - lastItr_time) / (this.length * this.env[0])*  curEnv_fl
+      accEnv_fl = accEnv_fl +  Math.abs((curEnv_fl - lastVal_fl) / (itr_time - lastItr_time)) * ((itr_time - lastItr_time) / (this.length * this.env[0]) )
+      
+      // plot circle
+      if ((itr_time / this.length) < this.env[0]) {
+        this.crc[0].alpha = 1.0;
+        maxVal_fl = curEnv_fl
+      } else {
+        this.crc[0].alpha = 0.381 * curEnv_fl / maxVal_fl + 0.618 * (1 - ((itr_time / this.length) - this.env[0]) / (this.env[2] + this.env[1]))
+      }
+      
+      this.growCircle(this.rad, accEnv_fl / intAccTot_fl, transferExpScale(0.381 * (itr_time / this.length) / this.env[0], Math.pow(2.718, 1.0)), lfo_val)
+
+      // adjust sound
+      minFreq_val = Math.min(minFreq_val, 120 * (1 + 0.618 * (1 - curEnv_fl)))
+      this.filter.frequency.value = minFreq_val
 
       // end animatioion
-      if (this.clcElp < itr_time * 0.95) {
+      if (this.length < itr_time || this.crc[0].alpha < 0.05) {
         this.crc[0].clear();
+        this.crc[0].alpha = 1.0
         clearInterval(ani_obj);
       }
     }, frmRate_int); // animation interval  
@@ -276,24 +324,23 @@ class beamAnimation {
   growCircle(rad_fl, rel1_fl, rel2_fl, rel3_fl) {
 
     // move disk
-    var curPos_vec = addVec(this.pos, scalarMulti(this.dir, - transferLogScale(rel1_fl, Math.pow(2.718, 2)) * this.maxStep))
+    let dirCrc_arr = this.dir
+    dirCrc_arr[0] = this.dir[2] * 0.0081 * rel3_fl
+    dirCrc_arr[1] = this.dir[2] * 0.0081 * rel3_fl
+
+    var curPos_vec = addVec(this.pos, scalarMulti(dirCrc_arr, - transferExpScale(rel1_fl, Math.pow(2.718, 2.0)) * this.maxStep))
 
     // control color and transparency
-    var trans_fl = 0.1 // trans_arr[0] + trans_arr[1] * transferLogScale(rel2_fl, 2.718)
-    var color_str = interpolateHex(this.color[0], this.color[1], transferLogScale(rel2_fl, Math.pow(2.718,1.0)))
+    var color_str = interpolateHex(this.color[0], this.color[1], transferLogScale(rel1_fl, Math.pow(2.718, 2.0)))
 
     // draw new circle 
     if (curPos_vec[2] > disExt_vec[0]) {
-      //this.crc[0].clear();
-      //plotDisk(this.crc[0], curPos_vec, rad_fl * rel2_fl, this.dir, color_str, trans_fl)
-      var scaRad_fl = rad_fl * transferLogScale(rel1_fl, 2.718)
-
-      plotDisk(this.crc[0], curPos_vec, scaRad_fl, scaRad_fl, this.dir, color_str, trans_fl)
-      plotShadow(this.crc[0], curPos_vec, scaRad_fl, this.dir, light1_vec, [0,1,0], floor_vec, color_str, 0.5 * trans_fl) 
+      var scaRad_fl = rad_fl * (0.05 + transferExpScale(rel1_fl, Math.pow(2.718, 1.0)))
+      plotDisk(this.crc[0], curPos_vec, scaRad_fl, scaRad_fl, dirCrc_arr, color_str, rel2_fl)
+      plotShadow(this.crc[0], curPos_vec, scaRad_fl, dirCrc_arr, light1_vec, [0,1,0], floor_vec, color_str, 0.618 * rel2_fl) 
     }
 
   }
-
   /*
   getRelShare() {
     if (this.next == -1) {
@@ -439,3 +486,5 @@ class seqEvent {
 }
 
 // #endregion
+
+

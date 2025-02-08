@@ -5,17 +5,16 @@ checkFps = false;
 fpsMeter = loadFps(checkFps)
 
 // setup parameters - single disks
-const maxElp_fl = 5.0 // maximum time for start hold
 const minElp_fl = 0.5 // minimum time for start hold
 const maxRep_int = 46; // maximum number of repetition
 const minRep_int = 8; // minimum number of repetition
 const parCrc_int = 20 // number of circles that can be displayed at the same time
 
-const rad_arr = [0.04, 0.02 * 1.618] // minimum radius and distance dependant radius relative to diagonal 
-const trans_arr  = [0.2, 0.02] // minimum transparency and distance dependant component
+const rad_arr = [0.08, 0.08 * 1.618] // minimum radius and distance dependant radius relative to diagonal 
 
 // setup parameters - inner and outer section
-const thrs_arr = [0.2, 0.2 * Math.pow(1.618,1)] // start radius for inner spawning, threshold for outer spawning, start radius for outer spawing
+const beats_arr = [16, 0.5] // length of note inner and outer circle in beats
+const thrs_arr = [0.9, 0.9]  // [0.2, 0.2 * Math.pow(1.618,1)] // start radius for inner spawning, threshold for outer spawning, start radius for outer spawing
 const relSpeed_arr = [1.0, 2.0] // relative speed indicator for inner and outer section //TODO usage not clear 
 const radRatio_fl = 1 / 1.618 // ratio of outer-to-inner radius
 
@@ -39,10 +38,10 @@ const view_proj = new projData([0.5 * size.x, 0.9 * size.y,  0], [Math.PI / 64, 
 const light1_vec = [0.5 * size.x,  - size.y, 500]
 const floor_vec = [0, size.y, 0]
 
-const frmRate_int = 200;
+const frmRate_int = 32;
 
 // sequencer setup
-trackBase_obj = new track(8, 4, 0)
+trackBase_obj = new track(6, 8, 0)
 trackHigh1_obj = new track(1.0, 0.25, 0.03125)
 trackHigh2_obj = new track(1.0, 0.25, 0.0)
 const seq_obj = new sequencer(120, [trackBase_obj, trackHigh1_obj, trackHigh2_obj])
@@ -76,6 +75,7 @@ hammer.on("press", function(event) {
 
 });
 
+
 hammer.on("tap", function(event) {
   // increase counter
   aniCnt_int = aniCnt_int + 1
@@ -93,28 +93,17 @@ function handleRelease(event) {
 
 hammer.on('pressup', handleRelease);
 hammer.on('panend', handleRelease);
- 
 
-beam_obj = new beamAnimation(size.x * 0.5, size.y * 0.8)
-beam_obj.clcElp = 5;
-event_obj = new seqEvent(0, seq_obj.start + 1, beam_obj.clcElp, 3, 1, {beam: beam_obj})
-// seq_obj.addEvent(event_obj)
-
-
-// 
-
-
-// debug: warum töne oben nicht schneller, was verhindert mehr unten 
 app.ticker.add(() => {
   seq_obj.checkTrigger(Date.now() / 1000)
 });
 
-// 0) deal with clicks:
-// hat mit setIntervall zu tun vermute ich -> stelle schedule auf tonejs um
-// -> grafiken auch?
-// check out https://medium.com/@ericroth/an-introduction-to-tone-js-f895e6ebd08
-// 1) explore midi connection -> setup approach for timing, C:\Program Files\OpenSSL-Win64
-// 2) mache arrangement rund (grösse, tempo variabel? etc.), muss noch nicht final, auch noch keine einschränkung gleichzeitigkeit, sinus bewegung in x und y richtung?
+// sound verfeinern und weiter mit animation verknüpfen -> schon nice so :)
+// chorus ausbauen -> lfo effekt ingesamt -> auch in grafik einbinden
+// pad-sound: farbe mit position verknüpfen
+// gebe druckdauer bedeutung: kurz -> einfach wiederholung, lang -> delay effekt, dafür längere pausen zwischen wiederholungen
+// fokus jetzt: mehr dynamik im einzelnen sound über effekt
+// 2) mache arrangement rund (grösse, tempo variabel, kreis im kreis? -> ingesamt sound design mit grafik über envelopes verknüpfen)
 // 2a) überlege verknüpfung der kreise für späteren sound effekt
 // 2b) steuere framerate variabel
 
